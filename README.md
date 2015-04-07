@@ -4,15 +4,15 @@ Go implement CLI, cURL-like tool for humans. Bat can be used for testing, debugg
 ![](images/logo.png)
 
 
-- [Main Features](#Main Features)
-- [Installation](#Installation)
-- [Usage](#Usage)
-- [HTTP Method](#HTTP Method)
-- [Request URL](#Request URL)
-- [Request Items](#Request Items)
-- [JSON](#JSON)
-- [Forms](#Forms)
-- [HTTP Headers](#HTTP Headers)
+- [Main Features](#main-features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [HTTP Method](#http-method)
+- [Request URL](#request-url)
+- [Request Items](#request-items)
+- [JSON](#json)
+- [Forms](#forms)
+- [HTTP Headers](#http-headers)
 
 ## Main Features
 
