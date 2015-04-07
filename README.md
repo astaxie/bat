@@ -57,7 +57,7 @@ See the request that is being sent using one of the output options:
 
 Use Github API to post a comment on an issue with authentication:
 
-	$ bat -a USERNAME POST https://api.github.com/repos/astaxie/bat/issues/1/comments body='HTTPie is awesome!'
+	$ bat -a USERNAME POST https://api.github.com/repos/astaxie/bat/issues/1/comments body='bat is awesome!'
 
 Upload a file using redirected input:
 
