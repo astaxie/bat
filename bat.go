@@ -26,12 +26,22 @@ import (
 const version = "0.0.1"
 
 var (
-	verbose = flag.Bool("verbose", false, "Print the whole HTTP exchange (request and response).")
-	form    = flag.Bool("form", false, "Submitting forms")
+	verbose bool
+	form    bool
+	auth    string
 	json    = flag.Bool("json", true, "Send the data with json object")
 	method  = flag.String("method", "GET", "HTTP Method")
 	URL     = flag.String("url", "", "HTTP request URL")
 )
+
+func init() {
+	flag.BoolVar(&verbose, "verbose", false, "Print the whole HTTP exchange (request and response).")
+	flag.BoolVar(&verbose, "v", false, "Print the whole HTTP exchange (request and response).")
+	flag.BoolVar(&form, "form", false, "Submitting forms")
+	flag.BoolVar(&form, "f", false, "Submitting forms")
+	flag.StringVar(&auth, "auth", "", "HTTP auth username:password, USER[:PASS]")
+	flag.StringVar(&auth, "a", "", "HTTP auth username:password, USER[:PASS]")
+}
 
 func main() {
 	flag.Parse()
