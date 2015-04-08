@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"strings"
 	"time"
 
@@ -8,10 +9,11 @@ import (
 )
 
 var defaultSetting = httplib.BeegoHttpSettings{
-	ShowDebug:        true,
+	ShowDebug:        false,
 	UserAgent:        "bat/" + version,
 	ConnectTimeout:   60 * time.Second,
 	ReadWriteTimeout: 60 * time.Second,
+	Gzip:             true,
 }
 
 func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequest) {
@@ -28,8 +30,12 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 		r = httplib.Delete(url)
 	}
 	r.Setting(defaultSetting)
-	r.Header("Accept", "*/*")
 	r.Header("Accept-Encoding", "gzip, deflate")
+	if form || method == "GET" {
+		r.Header("Accept", "*/*")
+	} else {
+		r.Header("Accept", "application/json")
+	}
 	for i := range args {
 		// Headers
 		strs := strings.Split(args[i], ":")
@@ -43,15 +49,25 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 		// Params
 		strs = strings.Split(args[i], "=")
 		if len(strs) == 2 {
-			r.Param(strs[0], strs[1])
+			if form {
+				r.Param(strs[0], strs[1])
+			} else {
+				jsonmap[strs[0]] = strs[1]
+			}
 			continue
 		}
 		// files
 		strs = strings.Split(args[i], "@")
 		if len(strs) == 2 {
+			if !form {
+				log.Fatal("file upload only support in forms style: -f=true")
+			}
 			r.PostFile(strs[0], strs[1])
 			continue
 		}
+	}
+	if !form && len(jsonmap) > 0 {
+		r.JsonBody(jsonmap)
 	}
 	return
 }

@@ -17,8 +17,10 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
@@ -31,9 +33,10 @@ var (
 	verbose bool
 	form    bool
 	auth    string
-	json    = flag.Bool("json", true, "Send the data with json object")
+	isjson  = flag.Bool("json", true, "Send the data with json object")
 	method  = flag.String("method", "GET", "HTTP Method")
 	URL     = flag.String("url", "", "HTTP request URL")
+	jsonmap map[string]interface{}
 )
 
 func init() {
@@ -43,6 +46,7 @@ func init() {
 	flag.BoolVar(&form, "f", false, "Submitting forms")
 	flag.StringVar(&auth, "auth", "", "HTTP auth username:password, USER[:PASS]")
 	flag.StringVar(&auth, "a", "", "HTTP auth username:password, USER[:PASS]")
+	jsonmap = make(map[string]interface{})
 }
 
 func main() {
@@ -52,6 +56,18 @@ func main() {
 	if len(args) > 0 {
 		args = filter(args)
 	}
+	fi, err := os.Stdin.Stat()
+	if err != nil {
+		panic(err)
+	}
+	var stdin []byte
+	if fi.Size() != 0 {
+		stdin, err = ioutil.ReadAll(os.Stdin)
+		if err != nil {
+			log.Fatal("Read from Stdin", err)
+		}
+	}
+
 	if *URL == "" {
 		log.Fatalln("bat should has the URL")
 	}
@@ -75,20 +91,50 @@ func main() {
 	*URL = u.String()
 	httpreq := getHTTP(*method, *URL, args)
 
+	if len(stdin) > 0 {
+		var j interface{}
+		err = json.Unmarshal(stdin, &j)
+		if err != nil {
+			log.Fatal("json.Unmarshal", err)
+		}
+		httpreq.JsonBody(j)
+	}
+
 	res, err := httpreq.Response()
 	if err != nil {
 		log.Fatalln("can't get the url", err)
 	}
-	fmt.Println(res.Proto, res.Status)
-	for k, v := range res.Header {
-		fmt.Println(k, ":", strings.Join(v, " "))
-	}
-	str, err := httpreq.String()
+	fi, err = os.Stdout.Stat()
 	if err != nil {
-		log.Fatalln("can't get the url", err)
+		panic(err)
 	}
-	fmt.Println("")
-	fmt.Println(str)
+	if fi.Mode()&os.ModeDevice == os.ModeDevice {
+		dump, err := httpreq.DumpRequest()
+		if err != nil {
+			log.Fatal("httpreq DumpRequest", err)
+		}
+		fmt.Println(string(dump))
+		fmt.Println("")
+		fmt.Println(res.Proto, res.Status)
+		for k, v := range res.Header {
+			fmt.Println(k, ":", strings.Join(v, " "))
+		}
+		str, err := httpreq.String()
+		if err != nil {
+			log.Fatalln("can't get the url", err)
+		}
+		fmt.Println("")
+		fmt.Println(str)
+	} else {
+		str, err := httpreq.String()
+		if err != nil {
+			log.Fatalln("can't get the url", err)
+		}
+		_, err = os.Stdout.WriteString(str)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
 
 var usageinfo string = `bat is a Go implement CLI, cURL-like tool for humans.
