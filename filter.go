@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"net/url"
 	"strings"
 )
 
@@ -13,18 +12,17 @@ func filter(args []string) []string {
 	if inSlice(strings.ToUpper(args[i]), methodList) {
 		*method = strings.ToUpper(args[i])
 		i++
-	} else if len(args) > 1 {
-		for i := range args[1:] {
+	} else if len(args) > 0 {
+		for _, v := range args[1:] {
 			// defaults to either GET (with no request data) or POST (with request data).
-
 			// Params
-			strs := strings.Split(args[i], "=")
+			strs := strings.Split(v, "=")
 			if len(strs) == 2 {
 				*method = "POST"
 				break
 			}
 			// files
-			strs = strings.Split(args[i], "@")
+			strs = strings.Split(v, "@")
 			if len(strs) == 2 {
 				*method = "POST"
 				break
@@ -33,10 +31,6 @@ func filter(args []string) []string {
 	}
 	if len(args) <= i {
 		log.Fatal("Miss the URL")
-	}
-	_, err := url.Parse(args[i])
-	if err != nil {
-		log.Fatal("URL schemal is error")
 	}
 	*URL = args[i]
 	i++

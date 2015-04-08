@@ -34,6 +34,9 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 		// Headers
 		strs := strings.Split(args[i], ":")
 		if len(strs) == 2 {
+			if strs[0] == "Host" {
+				r.SetHost(strs[1])
+			}
 			r.Header(strs[0], strs[1])
 			continue
 		}
