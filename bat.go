@@ -109,10 +109,7 @@ func main() {
 		panic(err)
 	}
 	if fi.Mode()&os.ModeDevice == os.ModeDevice {
-		dump, err := httpreq.DumpRequest()
-		if err != nil {
-			log.Fatal("httpreq DumpRequest", err)
-		}
+		dump := httpreq.DumpRequest()
 		fmt.Println(string(dump))
 		fmt.Println("")
 		fmt.Println(res.Proto, res.Status)

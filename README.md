@@ -117,15 +117,78 @@ If you find yourself manually constructing URLs with querystring parameters on t
 ## Request Items
 There are a few different request item types that provide a convenient mechanism for specifying HTTP headers, simple JSON and form data, files, and URL parameters.
 
+They are key/value pairs specified after the URL. All have in common that they become part of the actual request that is sent and that their type is distinguished only by the separator used: `:`, `=`, `:=`, `@`, `=@`, and `:=@`. The ones with an `@` expect a file path as value.
+
+
 |       Item Type         |	          Description           |
 | ------------------------| ------------------------------ | 
 |HTTP Headers `Name:Value`|Arbitrary HTTP header, e.g. `X-API-Token:123`.|
 |Data Fields `field=value`|Request data fields to be serialized as a JSON object (default), or to be form-encoded (--form, -f).|
 |Form File Fields `field@/dir/file`|Only available with `-form`, `-f`. For example `screenshot@~/Pictures/img.png`. The presence of a file field results in a `multipart/form-data` request.|
+|Form Fields from file `field=@file.txt`|read content from file as value|
+|Raw JSON fields `field:=json`, `field:=@file.json`|Useful when sending JSON and one or more fields need to be a Boolean, Number, nested Object, or an Array, e.g., meals:='["ham","spam"]' or pies:=[1,2,3] (note the quotes).|
+
+You can use `\` to escape characters that shouldn't be used as separators (or parts thereof). For instance, foo\==bar will become a data key/value pair (foo= and bar) instead of a URL parameter.
+
+You can also quote values, e.g. foo="bar baz".
 
 You can also quote values, e.g. `foo="bar baz"`.
 ## JSON
+JSON is the lingua franca of modern web services and it is also the implicit content type bat by default uses:
 
+If your command includes some data items, they are serialized as a JSON object by default. bat also automatically sets the following headers, both of which can be overwritten:
+
+|Content-Type	| application/json |
+| -------------| ----------------- |
+|Accept	        |application/json|
+
+You can use --json=true, -j=true to explicitly set Accept to `application/json` regardless of whether you are sending data (it's a shortcut for setting the header via the usual header notation – `bat url Accept:application/json`).
+
+Simple example:
+
+	$ bat PUT example.org name=John email=john@example.org
+	PUT / HTTP/1.1
+	Accept: application/json
+	Accept-Encoding: gzip, deflate
+	Content-Type: application/json
+	Host: example.org
+	
+	{
+	    "name": "John",
+	    "email": "john@example.org"
+	}
+
+Non-string fields use the := separator, which allows you to embed raw JSON into the resulting object. Text and raw JSON files can also be embedded into fields using =@ and :=@:
+
+	$ bat PUT api.example.com/person/1 \
+    name=John \
+    age:=29 married:=false hobbies:='["http", "pies"]' \  # Raw JSON
+    description=@about-john.txt \   # Embed text file
+    bookmarks:=@bookmarks.json      # Embed JSON file
+
+	PUT /person/1 HTTP/1.1
+	Accept: application/json
+	Content-Type: application/json
+	Host: api.example.com
+	
+	{
+	    "age": 29,
+	    "hobbies": [
+	        "http",
+	        "pies"
+	    ],
+	    "description": "John is a nice guy who likes pies.",
+	    "married": false,
+	    "name": "John",
+	    "bookmarks": {
+	        "HTTPie": "http://httpie.org",
+	    }
+	}
+	
+Send JSON data stored in a file (see redirected input for more examples):
+
+	$ bat POST api.example.com/person/1 < person.json
+	
 ## Forms
 Submitting forms is very similar to sending JSON requests. Often the only difference is in adding the `-form=true`, `-f` option, which ensures that data fields are serialized as, and Content-Type is set to, `application/x-www-form-urlencoded; charset=utf-8`.
 
