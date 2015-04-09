@@ -155,27 +155,31 @@ func main() {
 	}
 }
 
-var usageinfo string = `bat is a Go implement CLI, cURL-like tool for humans.
+var usageinfo string = `bat is a Go implemented CLI cURL-like tool for humans.
 
 Usage:
 
 	bat [flags] [METHOD] URL [ITEM [ITEM]]
 	
 flags:
-  -a,-auth USER[:PASS]: Pass a username:password pair as the argument
-  -f,-form=false: Submitting the data as forms
-  -j,-json=true: Send the data in json object
-  -v,-verbose=false: Print the whole HTTP exchange (request and response).
+  -a, -auth USER[:PASS]   Pass a username:password pair as the argument
+  -f, -form=false         Submitting the data as forms
+  -j, -json=true          Send the data in json object
+  -v, -verbose=false      Print the whole HTTP exchange (request and response)
 
 METHOD:
-   bat defaults to either GET (with no request data) or POST (with request data).
+   bat defaults to either GET (if there is no request data) or POST (with request data).
 
 URL:
-  The only information needs to perform a request is a URL.The default scheme is http://,
-  can be omitted from the argument, example.org works just fine.
+  The only information needed to perform a request is a URL. The default scheme is http://,
+  which can be omitted from the argument; example.org works just fine.
 
 ITEM:
-  Can any of QueryString, Header, Post data.
+  Can be any of:
+    Query string   key=value
+    Header         key:value
+    Post data      key=value
+    File upload    key@/path/file
 
 Example:
     
