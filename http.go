@@ -20,18 +20,7 @@ var defaultSetting = httplib.BeegoHttpSettings{
 }
 
 func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequest) {
-	switch method {
-	case "GET":
-		r = httplib.Get(url)
-	case "POST":
-		r = httplib.Post(url)
-	case "PUT":
-		r = httplib.Put(url)
-	case "HEAD":
-		r = httplib.Head(url)
-	case "DELETE":
-		r = httplib.Delete(url)
-	}
+	r = httplib.NewBeegoRequest(url, method)
 	r.Setting(defaultSetting)
 	r.Header("Accept-Encoding", "gzip, deflate")
 	if *isjson {
