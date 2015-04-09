@@ -43,7 +43,7 @@ See also `bat --help`.
 
 ### Examples
 
-Custom [HTTP method](#HTTP Method), [HTTP headers](HTTP Headers) and [JSON](#JSON) data:
+Custom [HTTP method](#http-method), [HTTP headers](#http-headers) and [JSON](#json) data:
 
 	$ bat PUT example.org X-API-Token:123 name=John
 
