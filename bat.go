@@ -24,6 +24,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"runtime"
 	"strings"
 )
 
@@ -56,15 +57,19 @@ func main() {
 	if len(args) > 0 {
 		args = filter(args)
 	}
-	fi, err := os.Stdin.Stat()
-	if err != nil {
-		panic(err)
-	}
+
 	var stdin []byte
-	if fi.Size() != 0 {
-		stdin, err = ioutil.ReadAll(os.Stdin)
+	if runtime.GOOS != "windows" {
+		fi, err := os.Stdin.Stat()
 		if err != nil {
-			log.Fatal("Read from Stdin", err)
+			panic(err)
+		}
+
+		if fi.Size() != 0 {
+			stdin, err = ioutil.ReadAll(os.Stdin)
+			if err != nil {
+				log.Fatal("Read from Stdin", err)
+			}
 		}
 	}
 
@@ -104,11 +109,36 @@ func main() {
 	if err != nil {
 		log.Fatalln("can't get the url", err)
 	}
-	fi, err = os.Stdout.Stat()
-	if err != nil {
-		panic(err)
-	}
-	if fi.Mode()&os.ModeDevice == os.ModeDevice {
+	if runtime.GOOS != "windows" {
+		fi, err := os.Stdout.Stat()
+		if err != nil {
+			panic(err)
+		}
+		if fi.Mode()&os.ModeDevice == os.ModeDevice {
+			dump := httpreq.DumpRequest()
+			fmt.Println(string(dump))
+			fmt.Println("")
+			fmt.Println(res.Proto, res.Status)
+			for k, v := range res.Header {
+				fmt.Println(k, ":", strings.Join(v, " "))
+			}
+			str, err := httpreq.String()
+			if err != nil {
+				log.Fatalln("can't get the url", err)
+			}
+			fmt.Println("")
+			fmt.Println(str)
+		} else {
+			str, err := httpreq.String()
+			if err != nil {
+				log.Fatalln("can't get the url", err)
+			}
+			_, err = os.Stdout.WriteString(str)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+	} else {
 		dump := httpreq.DumpRequest()
 		fmt.Println(string(dump))
 		fmt.Println("")
@@ -122,15 +152,6 @@ func main() {
 		}
 		fmt.Println("")
 		fmt.Println(str)
-	} else {
-		str, err := httpreq.String()
-		if err != nil {
-			log.Fatalln("can't get the url", err)
-		}
-		_, err = os.Stdout.WriteString(str)
-		if err != nil {
-			log.Fatal(err)
-		}
 	}
 }
 
