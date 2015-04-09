@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-// Bat is a go implement CLI, cURL-like tool for humans
+// Bat is a Go implemented CLI cURL-like tool for humans
 // bat [flags] [METHOD] URL [ITEM [ITEM]]
 package main
 
@@ -34,19 +34,19 @@ var (
 	verbose bool
 	form    bool
 	auth    string
-	isjson  = flag.Bool("json", true, "Send the data with json object")
-	method  = flag.String("method", "GET", "HTTP Method")
+	isjson  = flag.Bool("json", true, "Send the data as a JSON object")
+	method  = flag.String("method", "GET", "HTTP method")
 	URL     = flag.String("url", "", "HTTP request URL")
 	jsonmap map[string]interface{}
 )
 
 func init() {
-	flag.BoolVar(&verbose, "verbose", false, "Print the whole HTTP exchange (request and response).")
-	flag.BoolVar(&verbose, "v", false, "Print the whole HTTP exchange (request and response).")
-	flag.BoolVar(&form, "form", false, "Submitting forms")
-	flag.BoolVar(&form, "f", false, "Submitting forms")
-	flag.StringVar(&auth, "auth", "", "HTTP auth username:password, USER[:PASS]")
-	flag.StringVar(&auth, "a", "", "HTTP auth username:password, USER[:PASS]")
+	flag.BoolVar(&verbose, "verbose", false, "Print the whole HTTP exchange (request and response)")
+	flag.BoolVar(&verbose, "v", false, "Print the whole HTTP exchange (request and response)")
+	flag.BoolVar(&form, "form", false, "Submitting as a form")
+	flag.BoolVar(&form, "f", false, "Submitting as a form")
+	flag.StringVar(&auth, "auth", "", "HTTP authentication username:password, USER[:PASS]")
+	flag.StringVar(&auth, "a", "", "HTTP authentication username:password, USER[:PASS]")
 	jsonmap = make(map[string]interface{})
 }
 
@@ -74,7 +74,7 @@ func main() {
 	}
 
 	if *URL == "" {
-		log.Fatalln("bat should has the URL")
+		log.Fatalln("no URL given")
 	}
 	if strings.HasPrefix(*URL, ":") {
 		urlb := []byte(*URL)
@@ -163,8 +163,8 @@ Usage:
 	
 flags:
   -a, -auth USER[:PASS]   Pass a username:password pair as the argument
-  -f, -form=false         Submitting the data as forms
-  -j, -json=true          Send the data in json object
+  -f, -form=false         Submitting the data as a form
+  -j, -json=true          Send the data in a JSON object
   -v, -verbose=false      Print the whole HTTP exchange (request and response)
 
 METHOD:
