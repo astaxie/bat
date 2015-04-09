@@ -1,6 +1,8 @@
 # bat
 Go implement CLI, cURL-like tool for humans. Bat can be used for testing, debugging, and generally interacting with HTTP servers.
 
+Inspired from Httpie. Thanks for the author.
+
 ![](images/logo.png)
 
 
