@@ -1,4 +1,5 @@
 // Copyright 2014 beego Author. All Rights Reserved.
+// Copyright 2015 bat authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -76,7 +77,7 @@ func SetDefaultSetting(setting BeegoHttpSettings) {
 }
 
 // return *BeegoHttpRequest with specific method
-func newBeegoRequest(url, method string) *BeegoHttpRequest {
+func NewBeegoRequest(url, method string) *BeegoHttpRequest {
 	var resp http.Response
 	req := http.Request{
 		Method:     method,
@@ -90,27 +91,27 @@ func newBeegoRequest(url, method string) *BeegoHttpRequest {
 
 // Get returns *BeegoHttpRequest with GET method.
 func Get(url string) *BeegoHttpRequest {
-	return newBeegoRequest(url, "GET")
+	return NewBeegoRequest(url, "GET")
 }
 
 // Post returns *BeegoHttpRequest with POST method.
 func Post(url string) *BeegoHttpRequest {
-	return newBeegoRequest(url, "POST")
+	return NewBeegoRequest(url, "POST")
 }
 
 // Put returns *BeegoHttpRequest with PUT method.
 func Put(url string) *BeegoHttpRequest {
-	return newBeegoRequest(url, "PUT")
+	return NewBeegoRequest(url, "PUT")
 }
 
 // Delete returns *BeegoHttpRequest DELETE method.
 func Delete(url string) *BeegoHttpRequest {
-	return newBeegoRequest(url, "DELETE")
+	return NewBeegoRequest(url, "DELETE")
 }
 
 // Head returns *BeegoHttpRequest with HEAD method.
 func Head(url string) *BeegoHttpRequest {
-	return newBeegoRequest(url, "HEAD")
+	return NewBeegoRequest(url, "HEAD")
 }
 
 // BeegoHttpSettings
