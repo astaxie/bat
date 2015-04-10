@@ -1,7 +1,7 @@
 # bat
-Go implement CLI, cURL-like tool for humans. Bat can be used for testing, debugging, and generally interacting with HTTP servers.
+Go implemented CLI cURL-like tool for humans. Bat can be used for testing, debugging, and generally interacting with HTTP servers.
 
-Inspired from Httpie. Thanks for the author.
+Inspired by [Httpie](https://github.com/jakubroztocil/httpie). Thanks to the author, Jakub.
 
 ![](images/logo.png)
 
@@ -77,21 +77,21 @@ Set a custom Host header to work around missing DNS records:
 
 	$ bat localhost:8000 Host:example.com
 	
-What follows is a detailed documentation. It covers the command syntax, advanced usage, and also features additional examples.
+Following is the detailed documentation. It covers the command syntax, advanced usage, and also features additional examples.
 	
 ## HTTP Method
 The name of the HTTP method comes right before the URL argument:
 
 	$ bat DELETE example.org/todos/7
 	
-Which looks similar to the actual Request-Line that is sent:
+which looks similar to the actual Request-Line that is sent:
 
 DELETE /todos/7 HTTP/1.1
 
-When the METHOD argument is omitted from the command, bat defaults to either GET (with no request data) or POST (with request data).
+When the METHOD argument is omitted from the command, bat defaults to either GET (if there is no request data) or POST (with request data).
 
 ## Request URL
-The only information bat needs to perform a request is a URL. The default scheme is, somewhat unsurprisingly, http://, and can be omitted from the argument – http example.org works just fine.
+The only information bat needs to perform a request is a URL. The default scheme is, somewhat unsurprisingly, http://, and can be omitted from the argument – `bat example.org` works just fine.
 
 Additionally, curl-like shorthand for localhost is supported. This means that, for example :3000 would expand to http://localhost:3000 If the port is omitted, then port 80 is assumed.
 
@@ -110,7 +110,7 @@ Additionally, curl-like shorthand for localhost is supported. This means that, f
 	GET / HTTP/1.1
 	Host: localhost
 
-If you find yourself manually constructing URLs with querystring parameters on the terminal, you may appreciate the param==value syntax for appending URL parameters so that you don't have to worry about escaping the & separators. To search for bat on Google Images you could use this command:
+If you find yourself manually constructing URLs with query string parameters on the terminal, you may appreciate the `param=value` syntax for appending URL parameters so that you don't have to worry about escaping the & separators. To search for bat on Google Images you could use this command:
 
 	$ bat GET www.google.com search=bat tbm=isch
 
@@ -192,7 +192,7 @@ Send JSON data stored in a file (see redirected input for more examples):
 	$ bat POST api.example.com/person/1 < person.json
 	
 ## Forms
-Submitting forms is very similar to sending JSON requests. Often the only difference is in adding the `-form=true`, `-f` option, which ensures that data fields are serialized as, and Content-Type is set to, `application/x-www-form-urlencoded; charset=utf-8`.
+Submitting forms are very similar to sending JSON requests. Often the only difference is in adding the `-form=true`, `-f` option, which ensures that data fields are serialized correctly and Content-Type is set to, `application/x-www-form-urlencoded; charset=utf-8`.
 
 It is possible to make form data the implicit content type instead of JSON via the config file.
 
