@@ -3,6 +3,7 @@ Go implemented CLI cURL-like tool for humans. Bat can be used for testing, debug
 
 Inspired by [Httpie](https://github.com/jakubroztocil/httpie). Thanks to the author, Jakub.
 
+
 ![](images/logo.png)
 
 
@@ -45,9 +46,13 @@ See also `bat --help`.
 
 ### Examples
 
-Custom [HTTP method](#http-method), [HTTP headers](#http-headers) and [JSON](#json) data:
+Basic settings - [HTTP method](#http-method), [HTTP headers](#http-headers) and [JSON](#json) data:
 
 	$ bat PUT example.org X-API-Token:123 name=John
+
+Any custom HTTP method (such as WebDAV, etc.):
+
+	$ bat -method=PROPFIND example.org name=John
 
 Submitting forms:
 
