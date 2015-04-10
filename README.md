@@ -132,8 +132,6 @@ They are key/value pairs specified after the URL. All have in common that they b
 
 You can use `\` to escape characters that shouldn't be used as separators (or parts thereof). For instance, foo\==bar will become a data key/value pair (foo= and bar) instead of a URL parameter.
 
-You can also quote values, e.g. foo="bar baz".
-
 You can also quote values, e.g. `foo="bar baz"`.
 ## JSON
 JSON is the lingua franca of modern web services and it is also the implicit content type bat by default uses:
