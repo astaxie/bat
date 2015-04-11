@@ -93,6 +93,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	if auth != "" {
+		userpass := strings.Split(auth, ":")
+		if len(userpass) == 2 {
+			u.User = url.UserPassword(userpass[0], userpass[1])
+		} else {
+			u.User = url.User(auth)
+		}
+	}
 	*URL = u.String()
 	httpreq := getHTTP(*method, *URL, args)
 
