@@ -148,7 +148,7 @@ func main() {
 			dump := httpreq.DumpRequest()
 			fmt.Println(string(dump))
 			fmt.Println("")
-			fmt.Println(res.Proto, res.Status)
+			fmt.Println(Color(res.Proto, Red), Color(res.Status, Green))
 			for k, v := range res.Header {
 				fmt.Println(k, ":", strings.Join(v, " "))
 			}
