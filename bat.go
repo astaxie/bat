@@ -146,11 +146,11 @@ func main() {
 		}
 		if fi.Mode()&os.ModeDevice == os.ModeDevice {
 			dump := httpreq.DumpRequest()
-			fmt.Println(string(dump))
+			fmt.Println(ColorfulRequest(string(dump)))
 			fmt.Println("")
-			fmt.Println(Color(res.Proto, Red), Color(res.Status, Green))
+			fmt.Println(Color(res.Proto, Magenta), Color(res.Status, Green))
 			for k, v := range res.Header {
-				fmt.Println(k, ":", strings.Join(v, " "))
+				fmt.Println(Color(k, Gray), ":", Color(strings.Join(v, " "), Cyan))
 			}
 			str, err := httpreq.String()
 			if err != nil {
@@ -169,7 +169,7 @@ func main() {
 				}
 				str = string(bstr)
 			}
-			fmt.Println(str)
+			fmt.Println(ColorfulResponse(str))
 		} else {
 			str, err := httpreq.String()
 			if err != nil {
