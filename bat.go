@@ -110,7 +110,10 @@ func main() {
 	}
 	*URL = u.String()
 	httpreq := getHTTP(*method, *URL, args)
-
+	if u.User != nil {
+		password, _ := u.User.Password()
+		httpreq.GetRequest().SetBasicAuth(u.User.Username(), password)
+	}
 	// Proxy Support
 	if proxy != "" {
 		purl, err := url.Parse(proxy)
