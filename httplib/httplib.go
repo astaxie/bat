@@ -140,6 +140,11 @@ type BeegoHttpRequest struct {
 }
 
 // Change request settings
+func (b *BeegoHttpRequest) GetRequest() *http.Request {
+	return b.req
+}
+
+// Change request settings
 func (b *BeegoHttpRequest) Setting(setting BeegoHttpSettings) *BeegoHttpRequest {
 	b.setting = setting
 	return b

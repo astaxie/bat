@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"net/url"
 	"os"
 	"runtime"
@@ -31,22 +32,28 @@ import (
 const version = "0.0.1"
 
 var (
-	verbose bool
-	form    bool
-	auth    string
-	isjson  = flag.Bool("json", true, "Send the data as a JSON object")
-	method  = flag.String("method", "GET", "HTTP method")
-	URL     = flag.String("url", "", "HTTP request URL")
-	jsonmap map[string]interface{}
+	verbose          bool
+	form             bool
+	pretty           bool
+	auth             string
+	proxy            string
+	isjson           = flag.Bool("json", true, "Send the data as a JSON object")
+	method           = flag.String("method", "GET", "HTTP method")
+	URL              = flag.String("url", "", "HTTP request URL")
+	jsonmap          map[string]interface{}
+	contentJsonRegex = `application/json`
 )
 
 func init() {
+	flag.BoolVar(&pretty, "pretty", true, "Print Json Pretty Fomat")
+	flag.BoolVar(&pretty, "p", true, "Print Json Pretty Fomat")
 	flag.BoolVar(&verbose, "verbose", false, "Print the whole HTTP exchange (request and response)")
 	flag.BoolVar(&verbose, "v", false, "Print the whole HTTP exchange (request and response)")
 	flag.BoolVar(&form, "form", false, "Submitting as a form")
 	flag.BoolVar(&form, "f", false, "Submitting as a form")
 	flag.StringVar(&auth, "auth", "", "HTTP authentication username:password, USER[:PASS]")
 	flag.StringVar(&auth, "a", "", "HTTP authentication username:password, USER[:PASS]")
+	flag.StringVar(&proxy, "proxy", "", "Proxy host and port, PROXY_URL")
 	jsonmap = make(map[string]interface{})
 }
 
@@ -104,6 +111,21 @@ func main() {
 	*URL = u.String()
 	httpreq := getHTTP(*method, *URL, args)
 
+	// Proxy Support
+	if proxy != "" {
+		purl, err := url.Parse(proxy)
+		if err != nil {
+			log.Fatal("Proxy Url parse err", err)
+		}
+		httpreq.SetProxy(http.ProxyURL(purl))
+	} else {
+		eurl, err := http.ProxyFromEnvironment(httpreq.GetRequest())
+		if err != nil {
+			log.Fatal("Environment Proxy Url parse err", err)
+		}
+		httpreq.SetProxy(http.ProxyURL(eurl))
+	}
+
 	if len(stdin) > 0 {
 		var j interface{}
 		err = json.Unmarshal(stdin, &j)
@@ -135,11 +157,35 @@ func main() {
 				log.Fatalln("can't get the url", err)
 			}
 			fmt.Println("")
+			if pretty && strings.Contains(res.Header.Get("Content-Type"), contentJsonRegex) {
+				var output interface{}
+				err = json.Unmarshal([]byte(str), &output)
+				if err != nil {
+					log.Fatal("Response Json Unmarshal", err)
+				}
+				bstr, err := json.MarshalIndent(output, "", "  ")
+				if err != nil {
+					log.Fatal("Response Json MarshalIndent", err)
+				}
+				str = string(bstr)
+			}
 			fmt.Println(str)
 		} else {
 			str, err := httpreq.String()
 			if err != nil {
 				log.Fatalln("can't get the url", err)
+			}
+			if pretty && strings.Contains(res.Header.Get("Content-Type"), contentJsonRegex) {
+				var output interface{}
+				err = json.Unmarshal([]byte(str), &output)
+				if err != nil {
+					log.Fatal("Response Json Unmarshal", err)
+				}
+				bstr, err := json.MarshalIndent(output, "", "  ")
+				if err != nil {
+					log.Fatal("Response Json MarshalIndent", err)
+				}
+				str = string(bstr)
 			}
 			_, err = os.Stdout.WriteString(str)
 			if err != nil {
@@ -159,6 +205,18 @@ func main() {
 			log.Fatalln("can't get the url", err)
 		}
 		fmt.Println("")
+		if pretty && strings.Contains(res.Header.Get("Content-Type"), contentJsonRegex) {
+			var output interface{}
+			err = json.Unmarshal([]byte(str), &output)
+			if err != nil {
+				log.Fatal("Response Json Unmarshal", err)
+			}
+			bstr, err := json.MarshalIndent(output, "", "  ")
+			if err != nil {
+				log.Fatal("Response Json MarshalIndent", err)
+			}
+			str = string(bstr)
+		}
 		fmt.Println(str)
 	}
 }
@@ -170,10 +228,12 @@ Usage:
 	bat [flags] [METHOD] URL [ITEM [ITEM]]
 	
 flags:
-  -a, -auth USER[:PASS]   Pass a username:password pair as the argument
-  -f, -form=false         Submitting the data as a form
-  -j, -json=true          Send the data in a JSON object
-  -v, -verbose=false      Print the whole HTTP exchange (request and response)
+  -a, -auth=USER[:PASS]       Pass a username:password pair as the argument
+  -f, -form=false             Submitting the data as a form
+  -j, -json=true              Send the data in a JSON object
+  -v, -verbose=false          Print the whole HTTP exchange (request and response)
+  -p, -pretty=true            Print Json Pretty Fomat
+  -proxy=PROXY_URL            Proxy with host and port
 
 METHOD:
    bat defaults to either GET (if there is no request data) or POST (with request data).
