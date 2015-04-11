@@ -31,12 +31,12 @@ func ColorfulRequest(str string) string {
 	lines[0] = strings.Join(strs, " ")
 	for i, line := range lines[1:] {
 		substr := strings.Split(line, ":")
-		if len(substr) != 2 {
+		if len(substr) < 2 {
 			continue
 		}
 		substr[0] = Color(substr[0], Gray)
-		substr[1] = Color(substr[1], Cyan)
-		lines[i+1] = strings.Join(substr, ":")
+		substr[1] = Color(strings.Join(substr[1:], ":"), Cyan)
+		lines[i+1] = strings.Join(substr[:2], ":")
 	}
 	return strings.Join(lines, "\n")
 }
