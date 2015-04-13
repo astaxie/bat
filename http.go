@@ -52,7 +52,7 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 				continue
 			}
 			//@TODO strconv strs[1] to the correct type
-			jsonmap[strs[0]] = strs[1]
+			jsonmap[strs[0]] = toRealType(strs[1])
 			continue
 		}
 		// Headers
