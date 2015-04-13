@@ -81,7 +81,7 @@ func main() {
 	}
 
 	if *URL == "" {
-		log.Fatalln("no URL given")
+		usage()
 	}
 	if strings.HasPrefix(*URL, ":") {
 		urlb := []byte(*URL)
