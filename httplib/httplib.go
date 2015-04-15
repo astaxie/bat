@@ -304,8 +304,8 @@ func (b *BeegoHttpRequest) buildUrl(paramBody string) {
 		return
 	}
 
-	// build POST url and body
-	if b.req.Method == "POST" && b.req.Body == nil {
+	// build POST/PUT/PATCH url and body
+	if (b.req.Method == "POST" || b.req.Method == "PUT" || b.req.Method == "PATCH") && b.req.Body == nil {
 		// with files
 		if len(b.files) > 0 {
 			pr, pw := io.Pipe()
