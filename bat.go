@@ -27,6 +27,8 @@ import (
 	"os"
 	"runtime"
 	"strings"
+
+	"github.com/astaxie/bat/httplib"
 )
 
 const version = "0.0.1"
@@ -55,6 +57,28 @@ func init() {
 	flag.StringVar(&auth, "a", "", "HTTP authentication username:password, USER[:PASS]")
 	flag.StringVar(&proxy, "proxy", "", "Proxy host and port, PROXY_URL")
 	jsonmap = make(map[string]interface{})
+}
+
+func formatResponseBody(res *http.Response, httpreq *httplib.BeegoHttpRequest, pretty bool) string {
+	str, err := httpreq.String()
+	if err != nil {
+		log.Fatalln("can't get the url", err)
+	}
+	fmt.Println("")
+	if pretty && strings.Contains(res.Header.Get("Content-Type"), contentJsonRegex) {
+		var output interface{}
+		err = json.Unmarshal([]byte(str), &output)
+		if err != nil {
+			log.Fatal("Response Json Unmarshal", err)
+		}
+		bstr, err := json.MarshalIndent(output, "", "  ")
+		if err != nil {
+			log.Fatal("Response Json MarshalIndent", err)
+		}
+		str = string(bstr)
+	}
+
+	return str
 }
 
 func main() {
@@ -155,42 +179,13 @@ func main() {
 			for k, v := range res.Header {
 				fmt.Println(Color(k, Gray), ":", Color(strings.Join(v, " "), Cyan))
 			}
-			str, err := httpreq.String()
-			if err != nil {
-				log.Fatalln("can't get the url", err)
-			}
 			fmt.Println("")
-			if pretty && strings.Contains(res.Header.Get("Content-Type"), contentJsonRegex) {
-				var output interface{}
-				err = json.Unmarshal([]byte(str), &output)
-				if err != nil {
-					log.Fatal("Response Json Unmarshal", err)
-				}
-				bstr, err := json.MarshalIndent(output, "", "  ")
-				if err != nil {
-					log.Fatal("Response Json MarshalIndent", err)
-				}
-				str = string(bstr)
-			}
-			fmt.Println(ColorfulResponse(str))
+
+			body := formatResponseBody(res, httpreq, pretty)
+			fmt.Println(ColorfulResponse(body))
 		} else {
-			str, err := httpreq.String()
-			if err != nil {
-				log.Fatalln("can't get the url", err)
-			}
-			if pretty && strings.Contains(res.Header.Get("Content-Type"), contentJsonRegex) {
-				var output interface{}
-				err = json.Unmarshal([]byte(str), &output)
-				if err != nil {
-					log.Fatal("Response Json Unmarshal", err)
-				}
-				bstr, err := json.MarshalIndent(output, "", "  ")
-				if err != nil {
-					log.Fatal("Response Json MarshalIndent", err)
-				}
-				str = string(bstr)
-			}
-			_, err = os.Stdout.WriteString(str)
+			body := formatResponseBody(res, httpreq, pretty)
+			_, err = os.Stdout.WriteString(body)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -203,24 +198,10 @@ func main() {
 		for k, v := range res.Header {
 			fmt.Println(k, ":", strings.Join(v, " "))
 		}
-		str, err := httpreq.String()
-		if err != nil {
-			log.Fatalln("can't get the url", err)
-		}
 		fmt.Println("")
-		if pretty && strings.Contains(res.Header.Get("Content-Type"), contentJsonRegex) {
-			var output interface{}
-			err = json.Unmarshal([]byte(str), &output)
-			if err != nil {
-				log.Fatal("Response Json Unmarshal", err)
-			}
-			bstr, err := json.MarshalIndent(output, "", "  ")
-			if err != nil {
-				log.Fatal("Response Json MarshalIndent", err)
-			}
-			str = string(bstr)
-		}
-		fmt.Println(str)
+
+		body := formatResponseBody(res, httpreq, pretty)
+		fmt.Println(body)
 	}
 }
 
