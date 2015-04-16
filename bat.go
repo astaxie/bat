@@ -32,11 +32,11 @@ import (
 const version = "0.0.1"
 
 var (
-	verbose          bool
 	form             bool
 	pretty           bool
 	auth             string
 	proxy            string
+	printV           string
 	isjson           = flag.Bool("json", true, "Send the data as a JSON object")
 	method           = flag.String("method", "GET", "HTTP method")
 	URL              = flag.String("url", "", "HTTP request URL")
@@ -47,8 +47,7 @@ var (
 func init() {
 	flag.BoolVar(&pretty, "pretty", true, "Print Json Pretty Fomat")
 	flag.BoolVar(&pretty, "p", true, "Print Json Pretty Fomat")
-	flag.BoolVar(&verbose, "verbose", false, "Print the whole HTTP exchange (request and response)")
-	flag.BoolVar(&verbose, "v", false, "Print the whole HTTP exchange (request and response)")
+	flag.StringVar(&printV, "print", "A", "Print request and response")
 	flag.BoolVar(&form, "form", false, "Submitting as a form")
 	flag.BoolVar(&form, "f", false, "Submitting as a form")
 	flag.StringVar(&auth, "auth", "", "HTTP authentication username:password, USER[:PASS]")
@@ -64,14 +63,15 @@ func main() {
 	if len(args) > 0 {
 		args = filter(args)
 	}
-
+	if printV != "A" && printV != "B" {
+		defaultSetting.DumpBody = false
+	}
 	var stdin []byte
 	if runtime.GOOS != "windows" {
 		fi, err := os.Stdin.Stat()
 		if err != nil {
 			panic(err)
 		}
-
 		if fi.Size() != 0 {
 			stdin, err = ioutil.ReadAll(os.Stdin)
 			if err != nil {
@@ -148,17 +148,31 @@ func main() {
 			panic(err)
 		}
 		if fi.Mode()&os.ModeDevice == os.ModeDevice {
-			dump := httpreq.DumpRequest()
-			fmt.Println(ColorfulRequest(string(dump)))
-			fmt.Println("")
-			fmt.Println(Color(res.Proto, Magenta), Color(res.Status, Green))
-			for k, v := range res.Header {
-				fmt.Println(Color(k, Gray), ":", Color(strings.Join(v, " "), Cyan))
+			if printV == "A" || printV == "H" || printV == "B" {
+				dump := httpreq.DumpRequest()
+				if printV == "B" {
+					dps := strings.Split(string(dump), "\n")
+					for i, line := range dps {
+						if len(strings.Trim(line, "\r\n ")) == 0 {
+							dump = []byte(strings.Join(dps[i:], "\n"))
+							break
+						}
+					}
+				}
+				fmt.Println(ColorfulRequest(string(dump)))
+				fmt.Println("")
 			}
-			fmt.Println("")
-
-			body := formatResponseBody(res, httpreq, pretty)
-			fmt.Println(ColorfulResponse(body))
+			if printV == "A" || printV == "h" {
+				fmt.Println(Color(res.Proto, Magenta), Color(res.Status, Green))
+				for k, v := range res.Header {
+					fmt.Println(Color(k, Gray), ":", Color(strings.Join(v, " "), Cyan))
+				}
+				fmt.Println("")
+			}
+			if printV == "A" || printV == "b" {
+				body := formatResponseBody(res, httpreq, pretty)
+				fmt.Println(ColorfulResponse(body))
+			}
 		} else {
 			body := formatResponseBody(res, httpreq, pretty)
 			_, err = os.Stdout.WriteString(body)
@@ -167,17 +181,31 @@ func main() {
 			}
 		}
 	} else {
-		dump := httpreq.DumpRequest()
-		fmt.Println(string(dump))
-		fmt.Println("")
-		fmt.Println(res.Proto, res.Status)
-		for k, v := range res.Header {
-			fmt.Println(k, ":", strings.Join(v, " "))
+		if printV == "A" || printV == "H" || printV == "B" {
+			dump := httpreq.DumpRequest()
+			if printV == "B" {
+				dps := strings.Split(string(dump), "\n")
+				for i, line := range dps {
+					if len(strings.Trim(line, "\r\n ")) == 0 {
+						dump = []byte(strings.Join(dps[i:], "\n"))
+						break
+					}
+				}
+			}
+			fmt.Println(string(dump))
+			fmt.Println("")
 		}
-		fmt.Println("")
-
-		body := formatResponseBody(res, httpreq, pretty)
-		fmt.Println(body)
+		if printV == "A" || printV == "h" {
+			fmt.Println(res.Proto, res.Status)
+			for k, v := range res.Header {
+				fmt.Println(k, ":", strings.Join(v, " "))
+			}
+			fmt.Println("")
+		}
+		if printV == "A" || printV == "b" {
+			body := formatResponseBody(res, httpreq, pretty)
+			fmt.Println(body)
+		}
 	}
 }
 
@@ -191,10 +219,13 @@ flags:
   -a, -auth=USER[:PASS]       Pass a username:password pair as the argument
   -f, -form=false             Submitting the data as a form
   -j, -json=true              Send the data in a JSON object
-  -v, -verbose=false          Print the whole HTTP exchange (request and response)
   -p, -pretty=true            Print Json Pretty Fomat
   -proxy=PROXY_URL            Proxy with host and port
-
+  -print="A"                  String specifying what the output should contain, default will print all infomation
+         "H" request headers
+         "B" request body
+         "h" response headers
+         "b" response body
 METHOD:
    bat defaults to either GET (if there is no request data) or POST (with request data).
 

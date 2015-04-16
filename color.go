@@ -24,11 +24,13 @@ func Color(str string, color uint8) string {
 
 func ColorfulRequest(str string) string {
 	lines := strings.Split(str, "\n")
-	strs := strings.Split(lines[0], " ")
-	strs[0] = Color(strs[0], Magenta)
-	strs[1] = Color(strs[1], Cyan)
-	strs[2] = Color(strs[2], Magenta)
-	lines[0] = strings.Join(strs, " ")
+	if printV == "A" || printV == "H" {
+		strs := strings.Split(lines[0], " ")
+		strs[0] = Color(strs[0], Magenta)
+		strs[1] = Color(strs[1], Cyan)
+		strs[2] = Color(strs[2], Magenta)
+		lines[0] = strings.Join(strs, " ")
+	}
 	for i, line := range lines[1:] {
 		substr := strings.Split(line, ":")
 		if len(substr) < 2 {

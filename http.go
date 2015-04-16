@@ -19,6 +19,7 @@ var defaultSetting = httplib.BeegoHttpSettings{
 	ConnectTimeout:   60 * time.Second,
 	ReadWriteTimeout: 60 * time.Second,
 	Gzip:             true,
+	DumpBody:         true,
 }
 
 func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequest) {
