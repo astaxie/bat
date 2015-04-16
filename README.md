@@ -78,7 +78,7 @@ Download a file and save it via redirected output:
 	
 Download a file wget style:
 
-	$ bat --download example.org/file
+	$ bat -download=true example.org/file
 
 Set a custom Host header to work around missing DNS records:
 

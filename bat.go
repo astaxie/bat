@@ -20,11 +20,13 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 )
@@ -34,6 +36,7 @@ const version = "0.0.1"
 var (
 	form             bool
 	pretty           bool
+	download         bool
 	auth             string
 	proxy            string
 	printV           string
@@ -50,6 +53,8 @@ func init() {
 	flag.StringVar(&printV, "print", "A", "Print request and response")
 	flag.BoolVar(&form, "form", false, "Submitting as a form")
 	flag.BoolVar(&form, "f", false, "Submitting as a form")
+	flag.BoolVar(&download, "download", false, "Download the url content as file")
+	flag.BoolVar(&download, "d", false, "Download the url content as file")
 	flag.StringVar(&auth, "auth", "", "HTTP authentication username:password, USER[:PASS]")
 	flag.StringVar(&auth, "a", "", "HTTP authentication username:password, USER[:PASS]")
 	flag.StringVar(&proxy, "proxy", "", "Proxy host and port, PROXY_URL")
@@ -142,6 +147,22 @@ func main() {
 	if err != nil {
 		log.Fatalln("can't get the url", err)
 	}
+
+	if download {
+		_, fl := filepath.Split(u.Path)
+		fd, err := os.OpenFile(fl, os.O_RDWR|os.O_CREATE, 0666)
+		if err != nil {
+			log.Fatal("can't create file", err)
+		}
+		_, err = io.Copy(fd, res.Body)
+		if err != nil {
+			log.Fatal("Can't Write the body into file", err)
+		}
+		defer fd.Close()
+		defer res.Body.Close()
+		return
+	}
+
 	if runtime.GOOS != "windows" {
 		fi, err := os.Stdout.Stat()
 		if err != nil {
