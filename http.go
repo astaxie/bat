@@ -80,7 +80,7 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 				}
 				strs[1] = string(content)
 			}
-			if form {
+			if form || method == "GET" {
 				r.Param(strs[0], strs[1])
 			} else {
 				jsonmap[strs[0]] = strs[1]
