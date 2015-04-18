@@ -59,6 +59,7 @@ func ColorfulResponse(str, contenttype string) string {
 func ColorfulJson(str string) string {
 	var rsli []rune
 	var key, val, startcolor, endcolor, startsemicolon bool
+	var prev rune
 	for _, char := range []rune(str) {
 		switch char {
 		case ' ':
@@ -75,22 +76,26 @@ func ColorfulJson(str string) string {
 			val = false
 			rsli = append(rsli, char)
 		case '"':
-			if startcolor {
+			if startsemicolon && prev == '\\' {
 				rsli = append(rsli, char)
-				if key {
-					rsli = append(rsli, []rune(ColorStart(Magenta))...)
-				} else if val {
-					rsli = append(rsli, []rune(ColorStart(Cyan))...)
-				}
-				startsemicolon = true
-				key = false
-				val = false
-				startcolor = false
 			} else {
-				rsli = append(rsli, []rune(EndColor)...)
-				rsli = append(rsli, char)
-				endcolor = true
-				startsemicolon = false
+				if startcolor {
+					rsli = append(rsli, char)
+					if key {
+						rsli = append(rsli, []rune(ColorStart(Magenta))...)
+					} else if val {
+						rsli = append(rsli, []rune(ColorStart(Cyan))...)
+					}
+					startsemicolon = true
+					key = false
+					val = false
+					startcolor = false
+				} else {
+					rsli = append(rsli, []rune(EndColor)...)
+					rsli = append(rsli, char)
+					endcolor = true
+					startsemicolon = false
+				}
 			}
 		case ',':
 			if !startsemicolon {
@@ -133,6 +138,7 @@ func ColorfulJson(str string) string {
 			}
 			rsli = append(rsli, char)
 		}
+		prev = char
 	}
 	return string(rsli)
 }
