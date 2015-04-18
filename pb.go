@@ -184,5 +184,5 @@ func (pb *ProgressBar) write(current int64) {
 	}
 
 	// and print!
-	fmt.Print("\r" + out + end + "\n")
+	fmt.Print("\r" + out + end)
 }
