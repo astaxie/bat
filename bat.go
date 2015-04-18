@@ -28,6 +28,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
@@ -149,15 +150,49 @@ func main() {
 	}
 
 	if download {
-		_, fl := filepath.Split(u.Path)
+		var fl string
+		if disposition := res.Header.Get("Content-Disposition"); disposition != "" {
+			fls := strings.Split(disposition, ";")
+			for _, f := range fls {
+				f = strings.TrimSpace(f)
+				if strings.HasPrefix(f, "filename=") {
+					fl = strings.TrimLeft(f, "filename=")
+				}
+			}
+		}
+		if fl == "" {
+			_, fl = filepath.Split(u.Path)
+		}
 		fd, err := os.OpenFile(fl, os.O_RDWR|os.O_CREATE, 0666)
 		if err != nil {
 			log.Fatal("can't create file", err)
 		}
-		_, err = io.Copy(fd, res.Body)
+		if runtime.GOOS != "windowns" {
+			fmt.Println(Color(res.Proto, Magenta), Color(res.Status, Green))
+			for k, v := range res.Header {
+				fmt.Println(Color(k, Gray), ":", Color(strings.Join(v, " "), Cyan))
+			}
+		} else {
+			fmt.Println(res.Proto, res.Status)
+			for k, v := range res.Header {
+				fmt.Println(k, ":", strings.Join(v, " "))
+			}
+		}
+		fmt.Println("")
+		contentLength := res.Header.Get("Content-Length")
+		var total int64
+		if contentLength != "" {
+			total, _ = strconv.ParseInt(contentLength, 10, 64)
+		}
+		fmt.Printf("Downloading to \"%s\"\n", fl)
+		pb := NewProgressBar(total)
+		pb.Start()
+		multiWriter := io.MultiWriter(fd, pb)
+		_, err = io.Copy(multiWriter, res.Body)
 		if err != nil {
 			log.Fatal("Can't Write the body into file", err)
 		}
+		pb.Finish()
 		defer fd.Close()
 		defer res.Body.Close()
 		return
