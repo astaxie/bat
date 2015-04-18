@@ -6,6 +6,7 @@ Inspired by [Httpie](https://github.com/jakubroztocil/httpie). Thanks to the aut
 
 ![](images/logo.png)
 
+![](images/example.png)
 
 - [Main Features](#main-features)
 - [Installation](#installation)
