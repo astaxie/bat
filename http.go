@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -104,23 +105,20 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 }
 
 func formatResponseBody(res *http.Response, httpreq *httplib.BeegoHttpRequest, pretty bool) string {
-	str, err := httpreq.String()
+	body, err := httpreq.Bytes()
 	if err != nil {
 		log.Fatalln("can't get the url", err)
 	}
 	fmt.Println("")
 	if pretty && strings.Contains(res.Header.Get("Content-Type"), contentJsonRegex) {
-		var output interface{}
-		err = json.Unmarshal([]byte(str), &output)
+		var output bytes.Buffer
+		err := json.Indent(&output, body, "", "  ")
 		if err != nil {
-			log.Fatal("Response Json Unmarshal", err)
+			log.Fatal("Response Json Indent: ", err)
 		}
-		bstr, err := json.MarshalIndent(output, "", "  ")
-		if err != nil {
-			log.Fatal("Response Json MarshalIndent", err)
-		}
-		str = string(bstr)
+
+		return output.String()
 	}
 
-	return str
+	return string(body)
 }
