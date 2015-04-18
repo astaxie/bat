@@ -192,7 +192,7 @@ func main() {
 			}
 			if printV == "A" || printV == "b" {
 				body := formatResponseBody(res, httpreq, pretty)
-				fmt.Println(ColorfulResponse(body))
+				fmt.Println(ColorfulResponse(body, res.Header.Get("Content-Type")))
 			}
 		} else {
 			body := formatResponseBody(res, httpreq, pretty)
