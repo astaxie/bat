@@ -180,6 +180,12 @@ func (b *BeegoHttpRequest) Debug(isdebug bool) *BeegoHttpRequest {
 	return b
 }
 
+// Dump Body.
+func (b *BeegoHttpRequest) DumpBody(isdump bool) *BeegoHttpRequest {
+	b.setting.DumpBody = isdump
+	return b
+}
+
 // return the DumpRequest
 func (b *BeegoHttpRequest) DumpRequest() []byte {
 	return b.dump
@@ -351,6 +357,15 @@ func (b *BeegoHttpRequest) getResponse() (*http.Response, error) {
 	if b.resp.StatusCode != 0 {
 		return b.resp, nil
 	}
+	resp, err := b.SendOut()
+	if err != nil {
+		return nil, err
+	}
+	b.resp = resp
+	return resp, nil
+}
+
+func (b *BeegoHttpRequest) SendOut() (*http.Response, error) {
 	var paramBody string
 	if len(b.params) > 0 {
 		var buf bytes.Buffer
@@ -420,13 +435,7 @@ func (b *BeegoHttpRequest) getResponse() (*http.Response, error) {
 		}
 		b.dump = dump
 	}
-
-	resp, err := client.Do(b.req)
-	if err != nil {
-		return nil, err
-	}
-	b.resp = resp
-	return resp, nil
+	return client.Do(b.req)
 }
 
 // String returns the body string in response.

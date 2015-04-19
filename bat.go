@@ -32,7 +32,7 @@ import (
 	"strings"
 )
 
-const version = "0.0.1"
+const version = "0.0.2"
 
 var (
 	form             bool
@@ -41,6 +41,9 @@ var (
 	auth             string
 	proxy            string
 	printV           string
+	bench            bool
+	benchN           int
+	benchC           int
 	isjson           = flag.Bool("json", true, "Send the data as a JSON object")
 	method           = flag.String("method", "GET", "HTTP method")
 	URL              = flag.String("url", "", "HTTP request URL")
@@ -59,6 +62,10 @@ func init() {
 	flag.StringVar(&auth, "auth", "", "HTTP authentication username:password, USER[:PASS]")
 	flag.StringVar(&auth, "a", "", "HTTP authentication username:password, USER[:PASS]")
 	flag.StringVar(&proxy, "proxy", "", "Proxy host and port, PROXY_URL")
+	flag.BoolVar(&bench, "bench", false, "Sends bench requests to URL")
+	flag.BoolVar(&bench, "b", false, "Sends bench requests to URL")
+	flag.IntVar(&benchN, "b.N", 1000, "Number of requests to run")
+	flag.IntVar(&benchC, "b.C", 100, "Number of requests to run concurrently.")
 	jsonmap = make(map[string]interface{})
 }
 
@@ -143,12 +150,18 @@ func main() {
 		}
 		httpreq.JsonBody(j)
 	}
-
+	// AB bench
+	if bench {
+		httpreq.Debug(false)
+		RunBench(httpreq)
+		return
+	}
 	res, err := httpreq.Response()
 	if err != nil {
 		log.Fatalln("can't get the url", err)
 	}
 
+	// download file
 	if download {
 		var fl string
 		if disposition := res.Header.Get("Content-Disposition"); disposition != "" {
@@ -273,6 +286,9 @@ Usage:
 	
 flags:
   -a, -auth=USER[:PASS]       Pass a username:password pair as the argument
+  -b, -bench=false            Sends bench requests to URL
+  -b.N=1000                   Number of requests to run
+  -b.C=100                    Number of requests to run concurrently
   -f, -form=false             Submitting the data as a form
   -j, -json=true              Send the data in a JSON object
   -p, -pretty=true            Print Json Pretty Fomat
