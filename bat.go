@@ -41,6 +41,7 @@ var (
 	auth             string
 	proxy            string
 	printV           string
+	body             string
 	bench            bool
 	benchN           int
 	benchC           int
@@ -66,6 +67,7 @@ func init() {
 	flag.BoolVar(&bench, "b", false, "Sends bench requests to URL")
 	flag.IntVar(&benchN, "b.N", 1000, "Number of requests to run")
 	flag.IntVar(&benchC, "b.C", 100, "Number of requests to run concurrently.")
+	flag.StringVar(&body, "body", "", "Raw data send as body")
 	jsonmap = make(map[string]interface{})
 }
 
@@ -141,7 +143,9 @@ func main() {
 		}
 		httpreq.SetProxy(http.ProxyURL(eurl))
 	}
-
+	if body != "" {
+		httpreq.Body(body)
+	}
 	if len(stdin) > 0 {
 		var j interface{}
 		err = json.Unmarshal(stdin, &j)
@@ -150,6 +154,7 @@ func main() {
 		}
 		httpreq.JsonBody(j)
 	}
+
 	// AB bench
 	if bench {
 		httpreq.Debug(false)
@@ -289,6 +294,7 @@ flags:
   -b, -bench=false            Sends bench requests to URL
   -b.N=1000                   Number of requests to run
   -b.C=100                    Number of requests to run concurrently
+  -body=""                    Send RAW data as body
   -f, -form=false             Submitting the data as a form
   -j, -json=true              Send the data in a JSON object
   -p, -pretty=true            Print Json Pretty Fomat

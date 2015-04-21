@@ -28,6 +28,8 @@ func filter(args []string) []string {
 				break
 			}
 		}
+	} else if *method == "GET" && body != "" {
+		*method = "POST"
 	}
 	if len(args) <= i {
 		log.Fatal("Miss the URL")
