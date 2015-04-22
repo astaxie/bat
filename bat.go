@@ -33,7 +33,7 @@ import (
 	"strings"
 )
 
-const version = "0.0.2"
+const version = "0.0.3"
 
 var (
 	ver              bool
@@ -57,6 +57,7 @@ var (
 
 func init() {
 	flag.BoolVar(&ver, "v", false, "Print Version Number")
+	flag.BoolVar(&ver, "version", false, "Print Version Number")
 	flag.BoolVar(&pretty, "pretty", true, "Print Json Pretty Fomat")
 	flag.BoolVar(&pretty, "p", true, "Print Json Pretty Fomat")
 	flag.StringVar(&printV, "print", "A", "Print request and response")
@@ -319,7 +320,8 @@ flags:
          "B" request body
          "h" response headers
          "b" response body
-  -v                          Show Version Number 
+  -v, -verison=true           Show Version Number 
+
 METHOD:
    bat defaults to either GET (if there is no request data) or POST (with request data).
 
