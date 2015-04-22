@@ -35,6 +35,7 @@ import (
 const version = "0.0.2"
 
 var (
+	ver              bool
 	form             bool
 	pretty           bool
 	download         bool
@@ -53,6 +54,7 @@ var (
 )
 
 func init() {
+	flag.BoolVar(&ver, "v", false, "Print Version Number")
 	flag.BoolVar(&pretty, "pretty", true, "Print Json Pretty Fomat")
 	flag.BoolVar(&pretty, "p", true, "Print Json Pretty Fomat")
 	flag.StringVar(&printV, "print", "A", "Print request and response")
@@ -77,6 +79,10 @@ func main() {
 	args := flag.Args()
 	if len(args) > 0 {
 		args = filter(args)
+	}
+	if ver {
+		fmt.Println("Version:", version)
+		os.Exit(2)
 	}
 	if printV != "A" && printV != "B" {
 		defaultSetting.DumpBody = false
@@ -304,6 +310,7 @@ flags:
          "B" request body
          "h" response headers
          "b" response body
+  -v                          Show Version Number 
 METHOD:
    bat defaults to either GET (if there is no request data) or POST (with request data).
 
