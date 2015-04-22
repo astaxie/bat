@@ -63,7 +63,7 @@ func init() {
 	flag.BoolVar(&download, "download", false, "Download the url content as file")
 	flag.BoolVar(&download, "d", false, "Download the url content as file")
 	flag.BoolVar(&insecureSSL, "insecure", false, "Allow connections to SSL sites without certs")
-	flag.BoolVar(&insecureSSL, "k", false, "Allow connections to SSL sites without certs")
+	flag.BoolVar(&insecureSSL, "i", false, "Allow connections to SSL sites without certs")
 	flag.StringVar(&auth, "auth", "", "HTTP authentication username:password, USER[:PASS]")
 	flag.StringVar(&auth, "a", "", "HTTP authentication username:password, USER[:PASS]")
 	flag.StringVar(&proxy, "proxy", "", "Proxy host and port, PROXY_URL")
@@ -306,7 +306,7 @@ flags:
   -f, -form=false             Submitting the data as a form
   -j, -json=true              Send the data in a JSON object
   -p, -pretty=true            Print Json Pretty Fomat
-  -k, -insecure               Allow connections to SSL sites without certs
+  -i, -insecure=false         Allow connections to SSL sites without certs
   -proxy=PROXY_URL            Proxy with host and port
   -print="A"                  String specifying what the output should contain, default will print all infomation
          "H" request headers
