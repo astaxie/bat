@@ -17,6 +17,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -38,6 +39,7 @@ var (
 	form             bool
 	pretty           bool
 	download         bool
+	insecureSSL      bool
 	auth             string
 	proxy            string
 	printV           string
@@ -60,6 +62,8 @@ func init() {
 	flag.BoolVar(&form, "f", false, "Submitting as a form")
 	flag.BoolVar(&download, "download", false, "Download the url content as file")
 	flag.BoolVar(&download, "d", false, "Download the url content as file")
+	flag.BoolVar(&insecureSSL, "insecure", false, "Allow connections to SSL sites without certs")
+	flag.BoolVar(&insecureSSL, "i", false, "Allow connections to SSL sites without certs")
 	flag.StringVar(&auth, "auth", "", "HTTP authentication username:password, USER[:PASS]")
 	flag.StringVar(&auth, "a", "", "HTTP authentication username:password, USER[:PASS]")
 	flag.StringVar(&proxy, "proxy", "", "Proxy host and port, PROXY_URL")
@@ -128,6 +132,10 @@ func main() {
 	if u.User != nil {
 		password, _ := u.User.Password()
 		httpreq.GetRequest().SetBasicAuth(u.User.Username(), password)
+	}
+	// Insecure SSL Support
+	if insecureSSL {
+		httpreq.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	}
 	// Proxy Support
 	if proxy != "" {
@@ -298,6 +306,7 @@ flags:
   -f, -form=false             Submitting the data as a form
   -j, -json=true              Send the data in a JSON object
   -p, -pretty=true            Print Json Pretty Fomat
+  -i, -insecure=false         Allow connections to SSL sites without certs
   -proxy=PROXY_URL            Proxy with host and port
   -print="A"                  String specifying what the output should contain, default will print all infomation
          "H" request headers
