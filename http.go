@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -109,7 +108,7 @@ func formatResponseBody(res *http.Response, httpreq *httplib.BeegoHttpRequest, p
 	if err != nil {
 		log.Fatalln("can't get the url", err)
 	}
-	fmt.Println("")
+
 	if pretty && strings.Contains(res.Header.Get("Content-Type"), contentJsonRegex) {
 		var output bytes.Buffer
 		err := json.Indent(&output, body, "", "  ")
