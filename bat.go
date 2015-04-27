@@ -165,9 +165,10 @@ func main() {
 		var j interface{}
 		err = json.Unmarshal(stdin, &j)
 		if err != nil {
-			log.Fatal("json.Unmarshal", err)
+			httpreq.Body(stdin)
+		} else {
+			httpreq.JsonBody(j)
 		}
-		httpreq.JsonBody(j)
 	}
 
 	// AB bench
