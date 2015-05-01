@@ -201,7 +201,7 @@ func main() {
 		if err != nil {
 			log.Fatal("can't create file", err)
 		}
-		if runtime.GOOS != "windowns" {
+		if runtime.GOOS != "windows" {
 			fmt.Println(Color(res.Proto, Magenta), Color(res.Status, Green))
 			for k, v := range res.Header {
 				fmt.Println(Color(k, Gray), ":", Color(strings.Join(v, " "), Cyan))
