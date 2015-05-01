@@ -253,7 +253,7 @@ There are a couple of default headers that bat sets:
 	User-Agent: bat/<version>
 	Host: <taken-from-URL>
 
-Any of the default headers can be overwritten.
+Any of the default headers can be overridden.
 
 # Authentication
 Basic auth:
