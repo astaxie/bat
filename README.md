@@ -144,11 +144,12 @@ You can also quote values, e.g. `foo="bar baz"`.
 ## JSON
 JSON is the lingua franca of modern web services and it is also the implicit content type bat by default uses:
 
-If your command includes some data items, they are serialized as a JSON object by default. bat also automatically sets the following headers, both of which can be overwritten:
+If your command includes some data items, they are serialized as a JSON object by default. bat also automatically sets the following headers, both of which can be overridden:
 
-|Content-Type	| application/json |
-| -------------| ----------------- |
-|Accept	        |application/json|
+| header       | value            |
+| ------------ | ---------------- |
+| Content-Type | application/json |
+| Accept       | application/json |
 
 You can use --json=true, -j=true to explicitly set Accept to `application/json` regardless of whether you are sending data (it's a shortcut for setting the header via the usual header notation – `bat url Accept:application/json`).
 
@@ -252,7 +253,7 @@ There are a couple of default headers that bat sets:
 	User-Agent: bat/<version>
 	Host: <taken-from-URL>
 
-Any of the default headers can be overwritten.
+Any of the default headers can be overridden.
 
 # Authentication
 Basic auth:
