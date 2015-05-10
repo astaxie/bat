@@ -324,7 +324,7 @@ flags:
          "B" request body
          "h" response headers
          "b" response body
-  -v, -verison=true           Show Version Number 
+  -v, -version=true           Show Version Number 
 
 METHOD:
    bat defaults to either GET (if there is no request data) or POST (with request data).
