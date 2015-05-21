@@ -58,15 +58,6 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 			jsonmap[strs[0]] = toRealType(strs[1])
 			continue
 		}
-		// Headers
-		strs = strings.Split(args[i], ":")
-		if len(strs) >= 2 {
-			if strs[0] == "Host" {
-				r.SetHost(strings.Join(strs[1:], ":"))
-			}
-			r.Header(strs[0], strings.Join(strs[1:], ":"))
-			continue
-		}
 		// Params
 		strs = strings.Split(args[i], "=")
 		if len(strs) == 2 {
@@ -95,6 +86,15 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 				log.Fatal("file upload only support in forms style: -f=true")
 			}
 			r.PostFile(strs[0], strs[1])
+			continue
+		}
+		// Headers
+		strs = strings.Split(args[i], ":")
+		if len(strs) >= 2 {
+			if strs[0] == "Host" {
+				r.SetHost(strings.Join(strs[1:], ":"))
+			}
+			r.Header(strs[0], strings.Join(strs[1:], ":"))
 			continue
 		}
 	}
