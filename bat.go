@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/shiena/ansicolor"
 	"io"
 	"io/ioutil"
 	"log"
@@ -235,70 +236,39 @@ func main() {
 		return
 	}
 
-	if runtime.GOOS != "windows" {
-		fi, err := os.Stdout.Stat()
-		if err != nil {
-			panic(err)
-		}
-		if fi.Mode()&os.ModeDevice == os.ModeDevice {
-			if printV == "A" || printV == "H" || printV == "B" {
-				dump := httpreq.DumpRequest()
-				if printV == "B" {
-					dps := strings.Split(string(dump), "\n")
-					for i, line := range dps {
-						if len(strings.Trim(line, "\r\n ")) == 0 {
-							dump = []byte(strings.Join(dps[i:], "\n"))
-							break
-						}
-					}
-				}
-				fmt.Println(ColorfulRequest(string(dump)))
-				fmt.Println("")
-			}
-			if printV == "A" || printV == "h" {
-				fmt.Println(Color(res.Proto, Magenta), Color(res.Status, Green))
-				for k, v := range res.Header {
-					fmt.Println(Color(k, Gray), ":", Color(strings.Join(v, " "), Cyan))
-				}
-				fmt.Println("")
-			}
-			if printV == "A" || printV == "b" {
-				body := formatResponseBody(res, httpreq, pretty)
-				fmt.Println(ColorfulResponse(body, res.Header.Get("Content-Type")))
-			}
-		} else {
-			body := formatResponseBody(res, httpreq, pretty)
-			_, err = os.Stdout.WriteString(body)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-	} else {
-		if printV == "A" || printV == "H" || printV == "B" {
-			dump := httpreq.DumpRequest()
-			if printV == "B" {
-				dps := strings.Split(string(dump), "\n")
-				for i, line := range dps {
-					if len(strings.Trim(line, "\r\n ")) == 0 {
-						dump = []byte(strings.Join(dps[i:], "\n"))
-						break
-					}
+	fi, _ := os.Stdout.Stat()
+
+	if fi != nil && fi.Mode()&os.ModeCharDevice == 0 {
+		body := formatResponseBody(res, httpreq, pretty)
+		fmt.Print(body)
+		return
+	}
+
+	out := ansicolor.NewAnsiColorWriter(os.Stdout)
+	if printV == "A" || printV == "H" || printV == "B" {
+		dump := httpreq.DumpRequest()
+		if printV == "B" {
+			dps := strings.Split(string(dump), "\n")
+			for i, line := range dps {
+				if len(strings.Trim(line, "\r\n ")) == 0 {
+					dump = []byte(strings.Join(dps[i:], "\n"))
+					break
 				}
 			}
-			fmt.Println(string(dump))
-			fmt.Println("")
 		}
-		if printV == "A" || printV == "h" {
-			fmt.Println(res.Proto, res.Status)
-			for k, v := range res.Header {
-				fmt.Println(k, ":", strings.Join(v, " "))
-			}
-			fmt.Println("")
+		fmt.Fprintln(out, ColorfulRequest(string(dump)))
+		fmt.Fprintln(out, "")
+	}
+	if printV == "A" || printV == "h" {
+		fmt.Fprintln(out, Color(res.Proto, Magenta), Color(res.Status, Green))
+		for k, v := range res.Header {
+			fmt.Fprintln(out, Color(k, Gray), ":", Color(strings.Join(v, " "), Cyan))
 		}
-		if printV == "A" || printV == "b" {
-			body := formatResponseBody(res, httpreq, pretty)
-			fmt.Println(body)
-		}
+		fmt.Fprintln(out, "")
+	}
+	if printV == "A" || printV == "b" {
+		body := formatResponseBody(res, httpreq, pretty)
+		fmt.Fprintln(out, ColorfulResponse(body, res.Header.Get("Content-Type")))
 	}
 }
 
