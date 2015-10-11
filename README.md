@@ -63,7 +63,7 @@ Submitting forms:
 	
 See the request that is being sent using one of the output options:
 
-	$ bat -v example.org
+	$ bat -print="H" example.org
 
 Use Github API to post a comment on an issue with authentication:
 
