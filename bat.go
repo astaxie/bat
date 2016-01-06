@@ -34,7 +34,13 @@ import (
 	"strings"
 )
 
-const version = "0.1.0"
+const (
+	version              = "0.1.0"
+	printReqHeader uint8 = 1 << (iota - 1)
+	printReqBody
+	printRespHeader
+	printRespBody
+)
 
 var (
 	ver              bool
@@ -45,6 +51,7 @@ var (
 	auth             string
 	proxy            string
 	printV           string
+	printOption      uint8
 	body             string
 	bench            bool
 	benchN           int
@@ -79,7 +86,29 @@ func init() {
 	jsonmap = make(map[string]interface{})
 }
 
+func parsePrintOption(s string) {
+	if strings.ContainsRune(s, 'A') {
+		printOption = printReqHeader | printReqBody | printRespHeader | printRespBody
+		return
+	}
+
+	if strings.ContainsRune(s, 'H') {
+		printOption |= printReqHeader
+	}
+	if strings.ContainsRune(s, 'B') {
+		printOption |= printReqBody
+	}
+	if strings.ContainsRune(s, 'h') {
+		printOption |= printRespHeader
+	}
+	if strings.ContainsRune(s, 'b') {
+		printOption |= printRespBody
+	}
+	return
+}
+
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmicroseconds)
 	flag.Usage = usage
 	flag.Parse()
 	args := flag.Args()
@@ -90,7 +119,8 @@ func main() {
 		fmt.Println("Version:", version)
 		os.Exit(2)
 	}
-	if printV != "A" && printV != "B" {
+	parsePrintOption(printV)
+	if printOption&printReqBody != printReqBody {
 		defaultSetting.DumpBody = false
 	}
 	var stdin []byte
@@ -241,28 +271,32 @@ func main() {
 			panic(err)
 		}
 		if fi.Mode()&os.ModeDevice == os.ModeDevice {
-			if printV == "A" || printV == "H" || printV == "B" {
-				dump := httpreq.DumpRequest()
-				if printV == "B" {
-					dps := strings.Split(string(dump), "\n")
-					for i, line := range dps {
-						if len(strings.Trim(line, "\r\n ")) == 0 {
-							dump = []byte(strings.Join(dps[i:], "\n"))
-							break
-						}
-					}
+			var dumpHeader, dumpBody []byte
+			dump := httpreq.DumpRequest()
+			dps := strings.Split(string(dump), "\n")
+			for i, line := range dps {
+				if len(strings.Trim(line, "\r\n ")) == 0 {
+					dumpHeader = []byte(strings.Join(dps[:i], "\n"))
+					dumpBody = []byte(strings.Join(dps[i:], "\n"))
+					break
 				}
-				fmt.Println(ColorfulRequest(string(dump)))
+			}
+			if printOption&printReqHeader == printReqHeader {
+				fmt.Println(ColorfulRequest(string(dumpHeader)))
 				fmt.Println("")
 			}
-			if printV == "A" || printV == "h" {
+			if printOption&printReqBody == printReqBody {
+				fmt.Println(string(dumpBody))
+				fmt.Println("")
+			}
+			if printOption&printRespHeader == printRespHeader {
 				fmt.Println(Color(res.Proto, Magenta), Color(res.Status, Green))
 				for k, v := range res.Header {
 					fmt.Println(Color(k, Gray), ":", Color(strings.Join(v, " "), Cyan))
 				}
 				fmt.Println("")
 			}
-			if printV == "A" || printV == "b" {
+			if printOption&printRespBody == printRespBody {
 				body := formatResponseBody(res, httpreq, pretty)
 				fmt.Println(ColorfulResponse(body, res.Header.Get("Content-Type")))
 			}
@@ -274,28 +308,32 @@ func main() {
 			}
 		}
 	} else {
-		if printV == "A" || printV == "H" || printV == "B" {
-			dump := httpreq.DumpRequest()
-			if printV == "B" {
-				dps := strings.Split(string(dump), "\n")
-				for i, line := range dps {
-					if len(strings.Trim(line, "\r\n ")) == 0 {
-						dump = []byte(strings.Join(dps[i:], "\n"))
-						break
-					}
-				}
+		var dumpHeader, dumpBody []byte
+		dump := httpreq.DumpRequest()
+		dps := strings.Split(string(dump), "\n")
+		for i, line := range dps {
+			if len(strings.Trim(line, "\r\n ")) == 0 {
+				dumpHeader = []byte(strings.Join(dps[:i], "\n"))
+				dumpBody = []byte(strings.Join(dps[i:], "\n"))
+				break
 			}
-			fmt.Println(string(dump))
+		}
+		if printOption&printReqHeader == printReqHeader {
+			fmt.Println(string(dumpHeader))
 			fmt.Println("")
 		}
-		if printV == "A" || printV == "h" {
+		if printOption&printReqBody == printReqBody {
+			fmt.Println(string(dumpBody))
+			fmt.Println("")
+		}
+		if printOption&printRespHeader == printRespHeader {
 			fmt.Println(res.Proto, res.Status)
 			for k, v := range res.Header {
 				fmt.Println(k, ":", strings.Join(v, " "))
 			}
 			fmt.Println("")
 		}
-		if printV == "A" || printV == "b" {
+		if printOption&printRespBody == printRespBody {
 			body := formatResponseBody(res, httpreq, pretty)
 			fmt.Println(body)
 		}
@@ -307,7 +345,7 @@ var usageinfo string = `bat is a Go implemented CLI cURL-like tool for humans.
 Usage:
 
 	bat [flags] [METHOD] URL [ITEM [ITEM]]
-	
+
 flags:
   -a, -auth=USER[:PASS]       Pass a username:password pair as the argument
   -b, -bench=false            Sends bench requests to URL
@@ -324,7 +362,7 @@ flags:
          "B" request body
          "h" response headers
          "b" response body
-  -v, -version=true           Show Version Number 
+  -v, -version=true           Show Version Number
 
 METHOD:
    bat defaults to either GET (if there is no request data) or POST (with request data).
@@ -341,10 +379,10 @@ ITEM:
     File upload    key@/path/file
 
 Example:
-    
+
 	bat beego.me
-	
-more help information please refer to https://github.com/astaxie/bat	
+
+more help information please refer to https://github.com/astaxie/bat
 `
 
 func usage() {
