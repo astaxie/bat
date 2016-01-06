@@ -28,7 +28,7 @@ func ColorStart(color uint8) string {
 
 func ColorfulRequest(str string) string {
 	lines := strings.Split(str, "\n")
-	if printV == "A" || printV == "H" {
+	if printOption&printReqHeader == printReqHeader {
 		strs := strings.Split(lines[0], " ")
 		strs[0] = Color(strs[0], Magenta)
 		strs[1] = Color(strs[1], Cyan)
