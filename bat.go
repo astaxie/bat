@@ -223,7 +223,8 @@ func main() {
 			for _, f := range fls {
 				f = strings.TrimSpace(f)
 				if strings.HasPrefix(f, "filename=") {
-					fl = strings.TrimLeft(f, "filename=")
+					f = strings.TrimLeft(f, "filename=")
+					fl = strings.Trim(f, "\"' ")
 				}
 			}
 		}
