@@ -223,7 +223,12 @@ func main() {
 			for _, f := range fls {
 				f = strings.TrimSpace(f)
 				if strings.HasPrefix(f, "filename=") {
-					fl = strings.TrimLeft(f, "filename=")
+					// Remove 'filename='
+					f = strings.TrimLeft(f, "filename=")
+
+					// Remove quotes and spaces from either end
+					f = strings.TrimLeft(f, "\"' ")
+					fl = strings.TrimRight(f, "\"' ")
 				}
 			}
 		}
