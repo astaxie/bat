@@ -303,7 +303,7 @@ func main() {
 			}
 			if printOption&printRespBody == printRespBody {
 				body := formatResponseBody(res, httpreq, pretty)
-				fmt.Println(ColorfulResponse(body, res.Header.Get("Content-Type")))
+				fmt.Println(ColorfulResponse(body, res.Header.Get("Content-Type"), pretty))
 			}
 		} else {
 			body := formatResponseBody(res, httpreq, pretty)
