@@ -1,8 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
+
+	"github.com/fatih/color"
+	"github.com/nwidger/jsoncolor"
 )
 
 const (
@@ -47,100 +51,46 @@ func ColorfulRequest(str string) string {
 	return strings.Join(lines, "\n")
 }
 
-func ColorfulResponse(str, contenttype string) string {
+func ColorfulResponse(str, contenttype string, pretty bool) string {
 	if strings.Contains(contenttype, contentJsonRegex) {
-		str = ColorfulJson(str)
+		str = ColorfulJson(str, pretty)
 	} else {
 		str = ColorfulHTML(str)
 	}
 	return str
 }
 
-func ColorfulJson(str string) string {
-	var rsli []rune
-	var key, val, startcolor, endcolor, startsemicolon bool
-	var prev rune
-	for _, char := range []rune(str) {
-		switch char {
-		case ' ':
-			rsli = append(rsli, char)
-		case '{':
-			startcolor = true
-			key = true
-			val = false
-			rsli = append(rsli, char)
-		case '}':
-			startcolor = false
-			endcolor = false
-			key = false
-			val = false
-			rsli = append(rsli, char)
-		case '"':
-			if startsemicolon && prev == '\\' {
-				rsli = append(rsli, char)
-			} else {
-				if startcolor {
-					rsli = append(rsli, char)
-					if key {
-						rsli = append(rsli, []rune(ColorStart(Magenta))...)
-					} else if val {
-						rsli = append(rsli, []rune(ColorStart(Cyan))...)
-					}
-					startsemicolon = true
-					key = false
-					val = false
-					startcolor = false
-				} else {
-					rsli = append(rsli, []rune(EndColor)...)
-					rsli = append(rsli, char)
-					endcolor = true
-					startsemicolon = false
-				}
-			}
-		case ',':
-			if !startsemicolon {
-				startcolor = true
-				key = true
-				val = false
-				if !endcolor {
-					rsli = append(rsli, []rune(EndColor)...)
-					endcolor = true
-				}
-			}
-			rsli = append(rsli, char)
-		case ':':
-			if !startsemicolon {
-				key = false
-				val = true
-				startcolor = true
-				if !endcolor {
-					rsli = append(rsli, []rune(EndColor)...)
-					endcolor = true
-				}
-			}
-			rsli = append(rsli, char)
-		case '\n', '\r', '[', ']':
-			rsli = append(rsli, char)
-		default:
-			if !startsemicolon {
-				if key && startcolor {
-					rsli = append(rsli, []rune(ColorStart(Magenta))...)
-					key = false
-					startcolor = false
-					endcolor = false
-				}
-				if val && startcolor {
-					rsli = append(rsli, []rune(ColorStart(Cyan))...)
-					val = false
-					startcolor = false
-					endcolor = false
-				}
-			}
-			rsli = append(rsli, char)
-		}
-		prev = char
+func ColorfulJson(str string, pretty bool) string {
+	formatter := jsoncolor.NewFormatter()
+
+	formatter.SpaceColor = color.New()
+	formatter.CommaColor = color.New()
+	formatter.ColonColor = color.New()
+	formatter.ObjectColor = color.New()
+	formatter.ArrayColor = color.New()
+	formatter.FieldQuoteColor = color.New()
+	formatter.FieldColor = color.New(color.FgHiMagenta)
+	formatter.StringQuoteColor = color.New()
+	formatter.StringColor = color.New(color.FgHiCyan)
+	formatter.TrueColor = color.New(color.FgHiCyan)
+	formatter.FalseColor = color.New(color.FgHiCyan)
+	formatter.NumberColor = color.New(color.FgHiCyan)
+	formatter.NullColor = color.New(color.FgHiCyan)
+	if !pretty {
+		formatter.Prefix = ""
+		formatter.Indent = ""
+	} else {
+		formatter.Prefix = ""
+		formatter.Indent = "  "
 	}
-	return string(rsli)
+
+	buf := bytes.NewBuffer(make([]byte, 0, len(str)))
+	err := formatter.Format(buf, []byte(str))
+	if err != nil {
+		return str
+	}
+
+	return buf.String()
 }
 
 func ColorfulHTML(str string) string {
