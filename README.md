@@ -167,6 +167,20 @@ Simple example:
 	    "email": "john@example.org"
 	}
 
+Even custom/vendored media types that have a json format are getting detected, as long as they implement a json type response and contain a `json` in their declared form:
+
+	$ bat GET example.org/user/1 Accept:application/vnd.example.v2.0+json
+	GET / HTTP/1.1
+	Accept: application/vnd.example.v2.0+json
+	Accept-Encoding: gzip, deflate
+	Content-Type: application/vnd.example.v2.0+json
+	Host: example.org
+
+	{
+	    "name": "John",
+	    "email": "john@example.org"
+	}
+
 Non-string fields use the := separator, which allows you to embed raw JSON into the resulting object. Text and raw JSON files can also be embedded into fields using =@ and :=@:
 
 	$ bat PUT api.example.com/person/1 \

@@ -60,7 +60,7 @@ var (
 	method           = flag.String("method", "GET", "HTTP method")
 	URL              = flag.String("url", "", "HTTP request URL")
 	jsonmap          map[string]interface{}
-	contentJsonRegex = `application/json`
+	contentJsonRegex = `application/(.*)json`
 )
 
 func init() {
