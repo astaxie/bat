@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"regexp"
 	"strings"
 )
 
@@ -48,7 +50,11 @@ func ColorfulRequest(str string) string {
 }
 
 func ColorfulResponse(str, contenttype string) string {
-	if strings.Contains(contenttype, contentJsonRegex) {
+	match, err := regexp.MatchString(contentJsonRegex, contenttype)
+	if err != nil {
+		log.Fatalln("failed to compile regex", err)
+	}
+	if match {
 		str = ColorfulJson(str)
 	} else {
 		str = ColorfulHTML(str)
