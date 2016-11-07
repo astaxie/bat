@@ -66,8 +66,8 @@ var (
 func init() {
 	flag.BoolVar(&ver, "v", false, "Print Version Number")
 	flag.BoolVar(&ver, "version", false, "Print Version Number")
-	flag.BoolVar(&pretty, "pretty", true, "Print Json Pretty Fomat")
-	flag.BoolVar(&pretty, "p", true, "Print Json Pretty Fomat")
+	flag.BoolVar(&pretty, "pretty", true, "Print Json Pretty Format")
+	flag.BoolVar(&pretty, "p", true, "Print Json Pretty Format")
 	flag.StringVar(&printV, "print", "A", "Print request and response")
 	flag.BoolVar(&form, "form", false, "Submitting as a form")
 	flag.BoolVar(&form, "f", false, "Submitting as a form")
@@ -359,10 +359,10 @@ flags:
   -body=""                    Send RAW data as body
   -f, -form=false             Submitting the data as a form
   -j, -json=true              Send the data in a JSON object
-  -p, -pretty=true            Print Json Pretty Fomat
+  -p, -pretty=true            Print Json Pretty Format
   -i, -insecure=false         Allow connections to SSL sites without certs
   -proxy=PROXY_URL            Proxy with host and port
-  -print="A"                  String specifying what the output should contain, default will print all infomation
+  -print="A"                  String specifying what the output should contain, default will print all information
          "H" request headers
          "B" request body
          "h" response headers
@@ -370,7 +370,7 @@ flags:
   -v, -version=true           Show Version Number
 
 METHOD:
-   bat defaults to either GET (if there is no request data) or POST (with request data).
+  bat defaults to either GET (if there is no request data) or POST (with request data).
 
 URL:
   The only information needed to perform a request is a URL. The default scheme is http://,
