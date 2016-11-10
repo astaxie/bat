@@ -36,8 +36,16 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 		r.Header("Accept", "application/json")
 	}
 	for i := range args {
+		strs := strings.Split(args[i], ":")
+		if len(strs) >= 2 {
+			if strs[0] == "Host" {
+				r.SetHost(strings.Join(strs[1:], ":"))
+			}
+			r.Header(strs[0], strings.Join(strs[1:], ":"))
+			continue
+		}
 		// Json raws
-		strs := strings.Split(args[i], ":=")
+		strs = strings.Split(args[i], ":=")
 		if len(strs) == 2 {
 			if strings.HasPrefix(strs[1], "@") {
 				f, err := os.Open(strings.TrimLeft(strs[1], "@"))
@@ -87,15 +95,6 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 				log.Fatal("file upload only support in forms style: -f=true")
 			}
 			r.PostFile(strs[0], strs[1])
-			continue
-		}
-		// Headers
-		strs = strings.Split(args[i], ":")
-		if len(strs) >= 2 {
-			if strs[0] == "Host" {
-				r.SetHost(strings.Join(strs[1:], ":"))
-			}
-			r.Header(strs[0], strings.Join(strs[1:], ":"))
 			continue
 		}
 	}
