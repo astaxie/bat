@@ -37,7 +37,7 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 	}
 	for i := range args {
 		// Json raws
-		strs := strings.Split(args[i], ":=")
+		strs := strings.SplitN(args[i], ":=", 2)
 		if len(strs) == 2 {
 			if strings.HasPrefix(strs[1], "@") {
 				f, err := os.Open(strings.TrimLeft(strs[1], "@"))
@@ -60,7 +60,7 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 			continue
 		}
 		// Params
-		strs = strings.Split(args[i], "=")
+		strs = strings.SplitN(args[i], "=", 2)
 		if len(strs) == 2 {
 			if strings.HasPrefix(strs[1], "@") {
 				f, err := os.Open(strings.TrimLeft(strs[1], "@"))
@@ -81,7 +81,7 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 			continue
 		}
 		// files
-		strs = strings.Split(args[i], "@")
+		strs = strings.SplitN(args[i], "@", 2)
 		if len(strs) == 2 {
 			if !form {
 				log.Fatal("file upload only support in forms style: -f=true")
