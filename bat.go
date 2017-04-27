@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/hjson/hjson-go"
 	"io"
 	"io/ioutil"
 	"log"
@@ -29,6 +30,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"qiniu.com/auth/qiniumac.v1"
 	"runtime"
 	"strconv"
 	"strings"
@@ -56,6 +58,9 @@ var (
 	bench            bool
 	benchN           int
 	benchC           int
+	ak               string
+	sk               string
+	authQiniu        string
 	isjson           = flag.Bool("json", true, "Send the data as a JSON object")
 	method           = flag.String("method", "GET", "HTTP method")
 	URL              = flag.String("url", "", "HTTP request URL")
@@ -83,6 +88,9 @@ func init() {
 	flag.IntVar(&benchN, "b.N", 1000, "Number of requests to run")
 	flag.IntVar(&benchC, "b.C", 100, "Number of requests to run concurrently.")
 	flag.StringVar(&body, "body", "", "Raw data send as body")
+	flag.StringVar(&ak, "ak", "", "Qiniu ak")
+	flag.StringVar(&sk, "sk", "", "Qiniu sk")
+	flag.StringVar(&authQiniu, "auth-qiniu", "", "Qiniu ak sk file")
 	jsonmap = make(map[string]interface{})
 }
 
@@ -191,6 +199,28 @@ func main() {
 	}
 	if body != "" {
 		httpreq.Body(body)
+	}
+	if ak != "" && sk != "" {
+		httpreq.SetTransport(qiniumac.NewTransport(&qiniumac.Mac{AccessKey: ak, SecretKey: []byte(sk)}, nil))
+		httpreq.SetHost(httpreq.GetRequest().URL.Host)
+	} else if authQiniu != "" {
+		buf, err := ioutil.ReadFile(authQiniu)
+		if err != nil {
+			log.Fatalf("ioutil.ReadFile %s err %v", authQiniu, err)
+		}
+		var token struct {
+			Ak string `json:"ak"`
+			Sk string `json:"sk"`
+		}
+		var r interface{}
+		err = hjson.Unmarshal(buf, &r)
+		if err != nil {
+			log.Panic("bad auth file", err)
+		}
+		buf, _ = json.Marshal(r)
+		json.Unmarshal(buf, &token)
+		httpreq.SetTransport(qiniumac.NewTransport(&qiniumac.Mac{AccessKey: token.Ak, SecretKey: []byte(token.Sk)}, nil))
+		httpreq.SetHost(httpreq.GetRequest().URL.Host)
 	}
 	if len(stdin) > 0 {
 		var j interface{}
@@ -367,6 +397,9 @@ flags:
          "B" request body
          "h" response headers
          "b" response body
+  -ak                         Qiniu ak
+  -sk                         Qiniu sk
+  -auth-qiniu                 Qiniu ak sk json/hjson file
   -v, -version=true           Show Version Number
 
 METHOD:
