@@ -36,8 +36,12 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 		r.Header("Accept", "application/json")
 	}
 	for i := range args {
+		var strs []string
 		// Json raws
-		strs := strings.SplitN(args[i], ":=", 2)
+		if strings.HasPrefix(args[i], "Authorization") {
+			goto HEADER
+		}
+		strs = strings.SplitN(args[i], ":=", 2)
 		if len(strs) == 2 {
 			if strings.HasPrefix(strs[1], "@") {
 				f, err := os.Open(strings.TrimLeft(strs[1], "@"))
@@ -90,6 +94,7 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 			continue
 		}
 		// Headers
+	HEADER:
 		strs = strings.Split(args[i], ":")
 		if len(strs) >= 2 {
 			if strs[0] == "Host" {
