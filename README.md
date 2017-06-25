@@ -20,6 +20,14 @@ Inspired by [Httpie](https://github.com/jakubroztocil/httpie). Thanks to the aut
 - [Authentication](#authentication)
 - [Proxies](#proxies)
 
+## Docker
+
+    # Build the docker image
+	$ docker built -t astaxie/bat .
+	
+	# Run bat in a container
+	$ docker run --rm -it --net=host astaxie/bat exemple.org
+
 ## Main Features
 
 - Expressive and intuitive syntax

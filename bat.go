@@ -291,8 +291,10 @@ func main() {
 				fmt.Println("")
 			}
 			if printOption&printReqBody == printReqBody {
-				fmt.Println(string(dumpBody))
-				fmt.Println("")
+				if string(dumpBody) != "\r\n" {
+					fmt.Println(string(dumpBody))
+					fmt.Println("")
+				}
 			}
 			if printOption&printRespHeader == printRespHeader {
 				fmt.Println(Color(res.Proto, Magenta), Color(res.Status, Green))
