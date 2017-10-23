@@ -47,7 +47,7 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 		}
 		// files
 		strs = strings.SplitN(args[i], "@", 2)
-		if len(strs) == 2 {
+		if !*isjson && len(strs) == 2 {
 			if !form {
 				log.Fatal("file upload only support in forms style: -f=true")
 			}
