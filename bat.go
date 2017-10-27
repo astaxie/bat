@@ -61,6 +61,9 @@ var (
 	URL              = flag.String("url", "", "HTTP request URL")
 	jsonmap          map[string]interface{}
 	contentJsonRegex = `application/(.*)json`
+	batSessionDir    = `.batcli`
+	session          string
+	sessionDirectory string
 )
 
 func init() {
@@ -78,6 +81,7 @@ func init() {
 	flag.StringVar(&auth, "auth", "", "HTTP authentication username:password, USER[:PASS]")
 	flag.StringVar(&auth, "a", "", "HTTP authentication username:password, USER[:PASS]")
 	flag.StringVar(&proxy, "proxy", "", "Proxy host and port, PROXY_URL")
+	flag.StringVar(&session, "s", "", "Use a session with the request")
 	flag.BoolVar(&bench, "bench", false, "Sends bench requests to URL")
 	flag.BoolVar(&bench, "b", false, "Sends bench requests to URL")
 	flag.IntVar(&benchN, "b.N", 1000, "Number of requests to run")
@@ -167,6 +171,13 @@ func main() {
 	}
 	*URL = u.String()
 	httpreq := getHTTP(*method, *URL, args)
+
+	if session != "" {
+		sessionDirectory := getSessionDir(batSessionDir)
+		cookie := readSessionFile(sessionDirectory, session)
+		httpreq.SetCookie(&cookie)
+	}
+
 	if u.User != nil {
 		password, _ := u.User.Password()
 		httpreq.GetRequest().SetBasicAuth(u.User.Username(), password)
@@ -270,6 +281,11 @@ func main() {
 		return
 	}
 
+	if session != "" {
+		sessionDirectory := getSessionDir(batSessionDir)
+		saveSession(res, sessionDirectory, session)
+	}
+
 	if runtime.GOOS != "windows" {
 		fi, err := os.Stdout.Stat()
 		if err != nil {
@@ -364,12 +380,13 @@ flags:
   -p, -pretty=true            Print Json Pretty Format
   -i, -insecure=false         Allow connections to SSL sites without certs
   -proxy=PROXY_URL            Proxy with host and port
+  -s="SESSION_FILENAME.json"  Create, or reuse and update a session which will be used with requests. Sessions will be stored in ~/.batcli
   -print="A"                  String specifying what the output should contain, default will print all information
          "H" request headers
          "B" request body
          "h" response headers
          "b" response body
-  -v, -version=true           Show Version Number
+	-v, -version=true           Show Version Number
 
 METHOD:
   bat defaults to either GET (if there is no request data) or POST (with request data).

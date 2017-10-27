@@ -1,7 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"os/user"
 	"strconv"
 	"strings"
 )
@@ -77,4 +82,29 @@ func FormatBytes(i int64) (result string) {
 	}
 	result = strings.Trim(result, " ")
 	return
+}
+
+func getSessionDir(batDir string) (sessDir string) {
+	usr, homeErr := user.Current()
+	if homeErr != nil {
+		fmt.Println(homeErr)
+	}
+	sessDir = usr.HomeDir + `/` + batDir
+	if _, err := os.Stat(sessDir); os.IsNotExist(err) {
+		os.Mkdir(sessDir, 0755)
+	}
+	return sessDir
+}
+
+func readSessionFile(directory string, file string) http.Cookie {
+	jsonb, _ := ioutil.ReadFile(directory + `/` + file)
+	var cookieContent http.Cookie
+	jsonErr := json.Unmarshal(jsonb, &cookieContent)
+	if jsonErr != nil {
+		if _, err := os.Stat(directory + `/` + file); !os.IsNotExist(err) {
+			fmt.Println(`Unable to parse cookie JSON file`)
+			fmt.Println("")
+		}
+	}
+	return cookieContent
 }
