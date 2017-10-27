@@ -127,3 +127,17 @@ func formatResponseBody(res *http.Response, httpreq *httplib.BeegoHttpRequest, p
 
 	return string(body)
 }
+
+func saveSession(res *http.Response, sessionDir string, sessionName string) {
+	cookie := res.Cookies()
+	jsonPretty, jsonErr := json.MarshalIndent(&cookie[0], "", "  ")
+	if jsonErr != nil {
+		fmt.Println(jsonErr)
+		return
+	}
+	b := []byte(jsonPretty)
+	writeErr := ioutil.WriteFile(sessionDir+`/`+sessionName, b, 0644)
+	if writeErr != nil {
+		fmt.Println(writeErr)
+	}
+}
