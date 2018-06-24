@@ -36,6 +36,69 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 		r.Header("Accept", "application/json")
 	}
 	for i := range args {
+		iColon := strings.Index(args[i], ":")
+		iEquals := strings.Index(args[i], "=")
+		iColonEq := strings.Index(args[i], ":=")
+
+		if iColon <= 0 {
+			iColon = 999
+		}
+		if iEquals <= 0 {
+			iEquals = 999
+		}
+		if iColonEq <= 0 {
+			iColonEq = 999
+		}
+
+		if iColonEq < iEquals && iColonEq == iColon {
+			// Json raws
+			strs := strings.SplitN(args[i], ":=", 2)
+			if len(strs) == 2 {
+				if strings.HasPrefix(strs[1], "@") {
+					f, err := os.Open(strings.TrimLeft(strs[1], "@"))
+					if err != nil {
+						log.Fatal("Read File", strings.TrimLeft(strs[1], "@"), err)
+					}
+					content, err := ioutil.ReadAll(f)
+					if err != nil {
+						log.Fatal("ReadAll from File", strings.TrimLeft(strs[1], "@"), err)
+					}
+					var j interface{}
+					err = json.Unmarshal(content, &j)
+					if err != nil {
+						log.Fatal("Read from File", strings.TrimLeft(strs[1], "@"), "Unmarshal", err)
+					}
+					jsonmap[strs[0]] = j
+					continue
+				}
+				jsonmap[strs[0]] = toRealType(strs[1])
+				continue
+			}
+		}
+
+		if iEquals < iColonEq && iEquals < iColon {
+			// Params
+			strs := strings.SplitN(args[i], "=", 2)
+			if len(strs) == 2 {
+				if strings.HasPrefix(strs[1], "@") {
+					f, err := os.Open(strings.TrimLeft(strs[1], "@"))
+					if err != nil {
+						log.Fatal("Read File", strings.TrimLeft(strs[1], "@"), err)
+					}
+					content, err := ioutil.ReadAll(f)
+					if err != nil {
+						log.Fatal("ReadAll from File", strings.TrimLeft(strs[1], "@"), err)
+					}
+					strs[1] = string(content)
+				}
+				if form || method == "GET" {
+					r.Param(strs[0], strs[1])
+				} else {
+					jsonmap[strs[0]] = strs[1]
+				}
+				continue
+			}
+		}
 		// Headers
 		strs := strings.Split(args[i], ":")
 		if len(strs) >= 2 {
@@ -52,50 +115,6 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 				log.Fatal("file upload only support in forms style: -f=true")
 			}
 			r.PostFile(strs[0], strs[1])
-			continue
-		}
-		// Json raws
-		strs = strings.SplitN(args[i], ":=", 2)
-		if len(strs) == 2 {
-			if strings.HasPrefix(strs[1], "@") {
-				f, err := os.Open(strings.TrimLeft(strs[1], "@"))
-				if err != nil {
-					log.Fatal("Read File", strings.TrimLeft(strs[1], "@"), err)
-				}
-				content, err := ioutil.ReadAll(f)
-				if err != nil {
-					log.Fatal("ReadAll from File", strings.TrimLeft(strs[1], "@"), err)
-				}
-				var j interface{}
-				err = json.Unmarshal(content, &j)
-				if err != nil {
-					log.Fatal("Read from File", strings.TrimLeft(strs[1], "@"), "Unmarshal", err)
-				}
-				jsonmap[strs[0]] = j
-				continue
-			}
-			jsonmap[strs[0]] = toRealType(strs[1])
-			continue
-		}
-		// Params
-		strs = strings.SplitN(args[i], "=", 2)
-		if len(strs) == 2 {
-			if strings.HasPrefix(strs[1], "@") {
-				f, err := os.Open(strings.TrimLeft(strs[1], "@"))
-				if err != nil {
-					log.Fatal("Read File", strings.TrimLeft(strs[1], "@"), err)
-				}
-				content, err := ioutil.ReadAll(f)
-				if err != nil {
-					log.Fatal("ReadAll from File", strings.TrimLeft(strs[1], "@"), err)
-				}
-				strs[1] = string(content)
-			}
-			if form || method == "GET" {
-				r.Param(strs[0], strs[1])
-			} else {
-				jsonmap[strs[0]] = strs[1]
-			}
 			continue
 		}
 	}
