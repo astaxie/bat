@@ -36,26 +36,8 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 		r.Header("Accept", "application/json")
 	}
 	for i := range args {
-		// Headers
-		strs := strings.Split(args[i], ":")
-		if len(strs) >= 2 {
-			if strs[0] == "Host" {
-				r.SetHost(strings.Join(strs[1:], ":"))
-			}
-			r.Header(strs[0], strings.Join(strs[1:], ":"))
-			continue
-		}
-		// files
-		strs = strings.SplitN(args[i], "@", 2)
-		if !*isjson && len(strs) == 2 {
-			if !form {
-				log.Fatal("file upload only support in forms style: -f=true")
-			}
-			r.PostFile(strs[0], strs[1])
-			continue
-		}
 		// Json raws
-		strs = strings.SplitN(args[i], ":=", 2)
+		strs := strings.SplitN(args[i], ":=", 2)
 		if len(strs) == 2 {
 			if strings.HasPrefix(strs[1], "@") {
 				f, err := os.Open(strings.TrimLeft(strs[1], "@"))
@@ -75,6 +57,24 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 				continue
 			}
 			jsonmap[strs[0]] = toRealType(strs[1])
+			continue
+		}
+		// Headers
+		strs = strings.Split(args[i], ":")
+		if len(strs) >= 2 {
+			if strs[0] == "Host" {
+				r.SetHost(strings.Join(strs[1:], ":"))
+			}
+			r.Header(strs[0], strings.Join(strs[1:], ":"))
+			continue
+		}
+		// files
+		strs = strings.SplitN(args[i], "@", 2)
+		if !*isjson && len(strs) == 2 {
+			if !form {
+				log.Fatal("file upload only support in forms style: -f=true")
+			}
+			r.PostFile(strs[0], strs[1])
 			continue
 		}
 		// Params
