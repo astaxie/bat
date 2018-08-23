@@ -56,7 +56,7 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 				jsonmap[strs[0]] = j
 				continue
 			}
-			jsonmap[strs[0]] = toRealType(strs[1])
+			jsonmap[strs[0]] = json.RawMessage(strs[1])
 			continue
 		}
 		// Headers
@@ -100,7 +100,10 @@ func getHTTP(method string, url string, args []string) (r *httplib.BeegoHttpRequ
 		}
 	}
 	if !form && len(jsonmap) > 0 {
-		r.JsonBody(jsonmap)
+		_, err := r.JsonBody(jsonmap)
+		if err != nil {
+			log.Fatal("fail to marshal json: ", err)
+		}
 	}
 	return
 }
