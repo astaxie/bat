@@ -26,7 +26,7 @@ Inspired by [Httpie](https://github.com/jakubroztocil/httpie). Thanks to the aut
 	$ docker build -t astaxie/bat .
 	
 	# Run bat in a container
-	$ docker run --rm -it --net=host astaxie/bat exemple.org
+	$ docker run --rm -it --net=host astaxie/bat example.org
 
 ## Main Features
 
