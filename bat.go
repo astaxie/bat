@@ -299,7 +299,7 @@ func main() {
 			if printOption&printRespHeader == printRespHeader {
 				fmt.Println(Color(res.Proto, Magenta), Color(res.Status, Green))
 				for k, v := range res.Header {
-					fmt.Println(Color(k, Gray), ":", Color(strings.Join(v, " "), Cyan))
+					fmt.Printf("%s: %s\n", Color(k, Gray), Color(strings.Join(v, " "), Cyan))
 				}
 				fmt.Println("")
 			}
