@@ -61,7 +61,7 @@ func isfloat(v string) (float64, error) {
 	return strconv.ParseFloat(v, 64)
 }
 
-// Convert bytes to human readable string. Like a 2 MB, 64.2 KB, 52 B
+// FormatBytes: Convert bytes to human readable string. Like a 2 MB, 64.2 KB, 52 B
 func FormatBytes(i int64) (result string) {
 	switch {
 	case i > (1024 * 1024 * 1024 * 1024):

@@ -61,7 +61,7 @@ func (pb *ProgressBar) Start() {
 	go pb.writer()
 }
 
-// Write the current state of the progressbar
+// Update writes the current state of the progressbar
 func (pb *ProgressBar) Update() {
 	c := atomic.LoadInt64(&pb.current)
 	if c != pb.currentValue {
@@ -100,13 +100,13 @@ func (pb *ProgressBar) Add64(add int64) int64 {
 	return atomic.AddInt64(&pb.current, add)
 }
 
-// End print
+// Finish: End print
 func (pb *ProgressBar) Finish() {
 	atomic.StoreInt32(&pb.isFinish, 1)
 	pb.write(atomic.LoadInt64(&pb.current))
 }
 
-// implement io.Writer
+// Write: implement io.Writer
 func (pb *ProgressBar) Write(p []byte) (n int, err error) {
 	n = len(p)
 	pb.Add(n)
