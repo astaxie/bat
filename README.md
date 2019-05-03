@@ -39,9 +39,25 @@ Inspired by [Httpie](https://github.com/jakubroztocil/httpie). Thanks to the aut
 
 ## Installation
 
+### Install with Modules - Go 1.11 or higher
+
+If you only want to install the `bat` tool:
+
 	go get -u github.com/astaxie/bat
-	
-make sure the `$GOPATH/bin` is added into `$PATH`
+
+If you want a mutable copy of source code:
+
+	git clone https://github.com/astaxie/bat ;# clone outside of GOPATH
+	cd bat
+	go install
+
+Make sure the `~/go/bin` is added into `$PATH`.
+
+### Install without Modules - Before Go 1.11
+
+	go get -u github.com/astaxie/bat
+
+Make sure the `$GOPATH/bin` is added into `$PATH`.
 
 ## Usage
 
