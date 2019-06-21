@@ -63,7 +63,7 @@ func createDefaultCookie() {
 	defaultCookieJar, _ = cookiejar.New(nil)
 }
 
-// Overwrite default settings
+// SetDefaultSetting: Overwrite default settings
 func SetDefaultSetting(setting BeegoHttpSettings) {
 	settingMutex.Lock()
 	defer settingMutex.Unlock()
@@ -76,7 +76,7 @@ func SetDefaultSetting(setting BeegoHttpSettings) {
 	}
 }
 
-// return *BeegoHttpRequest with specific method
+// NewBeegoRequest returns *BeegoHttpRequest with specific method
 func NewBeegoRequest(rawurl, method string) *BeegoHttpRequest {
 	var resp http.Response
 	u, err := url.Parse(rawurl)
@@ -145,12 +145,12 @@ type BeegoHttpRequest struct {
 	dump    []byte
 }
 
-// get request
+// GetRequest gets request
 func (b *BeegoHttpRequest) GetRequest() *http.Request {
 	return b.req
 }
 
-// Change request settings
+// Setting: Change request settings
 func (b *BeegoHttpRequest) Setting(setting BeegoHttpSettings) *BeegoHttpRequest {
 	b.setting = setting
 	return b
@@ -180,13 +180,13 @@ func (b *BeegoHttpRequest) Debug(isdebug bool) *BeegoHttpRequest {
 	return b
 }
 
-// Dump Body.
+// DumpBody: Dump Body.
 func (b *BeegoHttpRequest) DumpBody(isdump bool) *BeegoHttpRequest {
 	b.setting.DumpBody = isdump
 	return b
 }
 
-// return the DumpRequest
+// DumpRequest returns the DumpRequest
 func (b *BeegoHttpRequest) DumpRequest() []byte {
 	return b.dump
 }
@@ -210,13 +210,13 @@ func (b *BeegoHttpRequest) Header(key, value string) *BeegoHttpRequest {
 	return b
 }
 
-// Set HOST
+// SetHost: Set HOST
 func (b *BeegoHttpRequest) SetHost(host string) *BeegoHttpRequest {
 	b.req.Host = host
 	return b
 }
 
-// Set the protocol version for incoming requests.
+// SetProtocolVersion: Set the protocol version for incoming requests.
 // Client requests always use HTTP/1.1.
 func (b *BeegoHttpRequest) SetProtocolVersion(vers string) *BeegoHttpRequest {
 	if len(vers) == 0 {
@@ -239,13 +239,13 @@ func (b *BeegoHttpRequest) SetCookie(cookie *http.Cookie) *BeegoHttpRequest {
 	return b
 }
 
-// Set transport to
+// SetTransport: Set transport to
 func (b *BeegoHttpRequest) SetTransport(transport http.RoundTripper) *BeegoHttpRequest {
 	b.setting.Transport = transport
 	return b
 }
 
-// Set http proxy
+// SetProxy: Set http proxy
 // example:
 //
 //	func(req *http.Request) (*url.URL, error) {
