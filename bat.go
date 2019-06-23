@@ -196,11 +196,10 @@ func main() {
 		var j interface{}
 		d := json.NewDecoder(bytes.NewReader(stdin))
 		d.UseNumber()
-		err = d.Decode(&j)
-		if err != nil {
+		if err = d.Decode(&j); err != nil {
 			httpreq.Body(stdin)
-		} else {
-			httpreq.JsonBody(j)
+		} else if _, err = httpreq.JsonBody(j); err != nil {
+			log.Fatal("fail to read body from Stdin: ", err)
 		}
 	}
 
