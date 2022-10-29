@@ -119,7 +119,7 @@ func formatResponseBody(res *http.Response, httpreq *httplib.BeegoHttpRequest, p
 		var output bytes.Buffer
 		err := json.Indent(&output, body, "", "  ")
 		if err != nil {
-			log.Fatal("Response Json Indent: ", err)
+			log.Fatalf("failed to JSON indent response body: %v. Body: %s", err, string(body))
 		}
 
 		return output.String()
